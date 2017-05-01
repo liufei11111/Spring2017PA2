@@ -96,7 +96,7 @@ class TrieNode implements Serializable{
       startI+=sizeOfTrie;
     }
     if (startI != endI){
-//      System.out.println("StartI: "+startI+", EndI: "+endI);
+      System.out.println("StartI: "+startI+", EndI: "+endI);
       throw new RuntimeException("Deserialize TrieNode mistaches!");
     }
     return new TrieNode(nextTrie,map,wordCount);
@@ -105,12 +105,14 @@ class TrieNode implements Serializable{
     if (startI==endI){
       return null;
     }
-//    System.out.println("parseChildrenFromBytes parse: startIe: "+startI+", endI: "+endI+", size: "+size);
+    System.out.println("parseChildrenFromBytes parse: startIe: "+startI+", endI: "+endI+", size: "+size);
     HashMap<Character, TrieNode> map = new HashMap<Character,TrieNode>(Config.hashMapInitialSize);
     for (int i=0;i<size;++i){
       char key = ByteBuffer.wrap(bytes,startI,2).getChar();
+      System.out.println("Key: "+key);
       startI+=2;
       int sizeTrieNode = ByteBuffer.wrap(bytes,startI,4).getInt();
+      System.out.println("sizeTrieNode: "+sizeTrieNode);
       startI+=4;
       TrieNode trieNode = TrieNode.deserialize(bytes,startI,startI+sizeTrieNode);
       startI+=sizeTrieNode;
