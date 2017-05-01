@@ -350,7 +350,7 @@ public class Trie implements Serializable{
     return searchWordNodePos(s.toCharArray(),node);
   }
   public TrieNode searchWordNodePos(char[] s, TrieNode node){
-    if (s.length == 0){return node;}
+    if (s.length == 0 || node==null){return node;}
     HashMap<Character, TrieNode> children = node.children;
     TrieNode cur = null;
     char[] sArray = s;
@@ -422,7 +422,7 @@ public class Trie implements Serializable{
     } else if (distance == 0){
       String temp = new String(Arrays.copyOfRange(original,curr,original.length));
 //      TrieNode endNode = this.searchWordNodePos(temp,node);
-//      System.out.println("temp: "+ temp+", result: "+result);
+      System.out.println("temp: "+ temp+", result: "+result);
 //      if (temp.equals("dd")){
 //        System.out.println(node);
 //      }
