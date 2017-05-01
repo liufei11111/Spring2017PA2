@@ -183,6 +183,7 @@ public class Trie implements Serializable{
   public byte[] serialize(){
 
     byte[] nodeBytes = this.root.serialize();
+    System.out.println(this.root);
     int memorySize = nodeBytes.length+4;
     System.out.println("Trie Serial: memory size: "+memorySize+", count: "+count);
     ByteBuffer bb = ByteBuffer.allocate(memorySize);
