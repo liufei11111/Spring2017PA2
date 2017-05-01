@@ -82,7 +82,7 @@ class TrieNode implements Serializable{
     }
     System.out.println("TrieNode deserial: start: "+startI+", endI: "+endI);
     int numOfMetaBytes = 4*4;
-    ByteBuffer bytes = ByteBuffer.wrap(bytesArray,startI,startI+numOfMetaBytes);
+    ByteBuffer bytes = ByteBuffer.wrap(bytesArray,startI,numOfMetaBytes);
     int size = bytes.getInt();
     int wordCount = bytes.getInt();
     int childrenByteSize = bytes.getInt();
@@ -108,9 +108,9 @@ class TrieNode implements Serializable{
     System.out.println("parseChildrenFromBytes parse: startIe: "+startI+", endI: "+endI+", size: "+size);
     HashMap<Character, TrieNode> map = new HashMap<Character,TrieNode>(Config.hashMapInitialSize);
     for (int i=0;i<size;++i){
-      char key = ByteBuffer.wrap(bytes,startI,startI+2).getChar();
+      char key = ByteBuffer.wrap(bytes,startI,2).getChar();
       startI+=2;
-      int sizeTrieNode = ByteBuffer.wrap(bytes,startI,startI+4).getInt();
+      int sizeTrieNode = ByteBuffer.wrap(bytes,startI,4).getInt();
       startI+=4;
       TrieNode trieNode = TrieNode.deserialize(bytes,startI,startI+sizeTrieNode);
       startI+=sizeTrieNode;
@@ -166,7 +166,7 @@ public class Trie implements Serializable{
       return null;
     }
     System.out.println("Trie deserial: start: "+startI+", endI: "+endI);
-    ByteBuffer bb = ByteBuffer.wrap(b,startI,startI+4);
+    ByteBuffer bb = ByteBuffer.wrap(b,startI,4);
     startI+=4;
     int count = bb.getInt();
     TrieNode node = TrieNode.deserialize(b,startI,startI+count);
