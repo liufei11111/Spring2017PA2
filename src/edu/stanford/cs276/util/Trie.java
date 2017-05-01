@@ -81,7 +81,7 @@ class TrieNode implements Serializable{
 
   public static synchronized TrieNode deserialize(byte[]  bytesArray, int startI, int endI){
     if (startI==endI){
-      return null;
+      return new HashMap<>(1);
     }
     System.out.println("TrieNode deserial: start1: "+startI+", endI: "+endI);
     int numOfMetaBytes = 4*4;
