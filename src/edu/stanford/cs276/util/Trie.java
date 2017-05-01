@@ -76,7 +76,7 @@ class TrieNode implements Serializable{
 
 
 
-  public static TrieNode deserialize(byte[]  bytesArray, int startI, int endI){
+  public static synchronized  TrieNode deserialize(byte[]  bytesArray, int startI, int endI){
     if (startI==endI){
       return null;
     }
