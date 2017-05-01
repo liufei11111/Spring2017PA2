@@ -399,11 +399,13 @@ public class Trie implements Serializable{
   }
   public Double getBigramProbFor(String[] terms, int startI, LanguageModel lm){
     double unigramLogProd = 0.0;
-    if (startI<=terms.length-1){
-      TrieNode node = searchWordNodePos(terms[startI]);
-      if (node !=null){
+    TrieNode node = searchWordNodePos(terms[startI]);
+    if (startI<=terms.length-1&&node!=null){
+
+
+
         unigramLogProd = node.wordCount*1.0/this.count;
-      }
+
 //      TrieNode biNode = searchWordNodePos(terms,startI,startI+2,this);
       double bigramWordCount = 0.0;
       if (node != null){
