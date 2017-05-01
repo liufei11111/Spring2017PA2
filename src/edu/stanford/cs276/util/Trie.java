@@ -91,6 +91,7 @@ class TrieNode implements Serializable{
       startI+=sizeOfTrie;
     }
     if (startI != endI){
+      System.out.println("StartI: "+startI+", EndI: "+endI);
       throw new RuntimeException("Deserialize TrieNode mistaches!");
     }
     return new TrieNode(nextTrie,map,wordCount);
