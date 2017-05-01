@@ -99,10 +99,10 @@ class TrieNode implements Serializable{
       startI+=sizeOfTrie;
     }
 
-    if (startI != endI){
-      System.out.println("StartI 5: "+startI+", EndI: "+endI);
-      throw new RuntimeException("Deserialize TrieNode mistaches!");
-    }
+//    if (startI != endI){
+//      System.out.println("StartI 5: "+startI+", EndI: "+endI);
+//      throw new RuntimeException("Deserialize TrieNode mistaches!");
+//    }
     return new TrieNode(nextTrie,map,wordCount);
   }
   private static HashMap<Character,TrieNode> parseChildrenFromBytes(byte[] bytes, int startI, int endI, int size) {

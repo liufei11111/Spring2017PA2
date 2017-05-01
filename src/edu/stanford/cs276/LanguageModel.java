@@ -28,7 +28,7 @@ public class LanguageModel implements Serializable {
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
 //  HashMap<String,Integer> map = new HashMap<>();
-  HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
+//  HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
   Dictionary kGramTrieDict = new Dictionary();
 
   /*
@@ -123,6 +123,7 @@ public class LanguageModel implements Serializable {
   private  static LanguageModel deserialize(byte[] b) {
     Dictionary dic = Dictionary.deserialize(b);
     LanguageModel lmNew = new LanguageModel(dic);
+    System.out.println(lmNew.kGramTrieDict);
     return lmNew;
   }
   private  byte[] serialize() {
