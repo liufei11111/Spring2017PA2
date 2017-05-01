@@ -77,6 +77,8 @@ public class LanguageModel implements Serializable {
          */
         String[] tokens = line.split(" ");
         for (int i=0;i<=tokens.length-2;++i){
+            System.out.println("Line: "+line);
+            System.out.println("Tokens: "+Arrays.toString(tokens));
             kGramTrieDict.addKGram(tokens,i,i+Config.kOfGrams);
 
 
