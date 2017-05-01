@@ -92,7 +92,7 @@ public class Dictionary implements Serializable{
       }
       if (selectedIndex >= 0){
         wrongWords.add(new Pair<>(selectedIndex,currentLowProd));
-        wrongWords.add(new Pair<>(selectedIndex+1,currentLowProd));
+//        wrongWords.add(new Pair<>(selectedIndex+1,currentLowProd));
       }
     }
     //wrong words are term level and candidate sets are query level
@@ -161,7 +161,7 @@ public class Dictionary implements Serializable{
       List<Pair<String,Integer>> list = eachTermSet.get(setIndex);
       for (Pair<String,Integer> term : list){
         int restoreLen = sb.length();
-        sb.append(term.getFirst());
+        sb.append(" "+term.getFirst());
         dfsWithCanset(eachTermSet,sb,setIndex+1,cumEditDiff+term.getSecond(),candidateSet);
         sb.setLength(restoreLen);
       }
