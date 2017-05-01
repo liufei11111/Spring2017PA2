@@ -66,8 +66,8 @@ class TrieNode implements Serializable{
     bb.putInt(wordCount);
     bb.putInt(childrenByteSize);
     bb.putInt(sizeOfTrie);
-    System.out.println("Serialize TrieNode: size: "+size+", wordCount: "+wordCount
-        +", childrenByteSize: "+childrenByteSize+",sizeOfTrie "+sizeOfTrie);
+//    System.out.println("Serialize TrieNode: size: "+size+", wordCount: "+wordCount
+//        +", childrenByteSize: "+childrenByteSize+",sizeOfTrie "+sizeOfTrie);
     for (byte[] array : listAssetBytes){
       bb.put(array);
     }
@@ -80,7 +80,7 @@ class TrieNode implements Serializable{
     if (startI==endI){
       return null;
     }
-    System.out.println("TrieNode deserial: start: "+startI+", endI: "+endI);
+//    System.out.println("TrieNode deserial: start: "+startI+", endI: "+endI);
     int numOfMetaBytes = 4*4;
     ByteBuffer bytes = ByteBuffer.wrap(bytesArray,startI,numOfMetaBytes);
     int size = bytes.getInt();
@@ -96,7 +96,7 @@ class TrieNode implements Serializable{
       startI+=sizeOfTrie;
     }
     if (startI != endI){
-      System.out.println("StartI: "+startI+", EndI: "+endI);
+//      System.out.println("StartI: "+startI+", EndI: "+endI);
       throw new RuntimeException("Deserialize TrieNode mistaches!");
     }
     return new TrieNode(nextTrie,map,wordCount);
@@ -105,7 +105,7 @@ class TrieNode implements Serializable{
     if (startI==endI){
       return null;
     }
-    System.out.println("parseChildrenFromBytes parse: startIe: "+startI+", endI: "+endI+", size: "+size);
+//    System.out.println("parseChildrenFromBytes parse: startIe: "+startI+", endI: "+endI+", size: "+size);
     HashMap<Character, TrieNode> map = new HashMap<Character,TrieNode>(Config.hashMapInitialSize);
     for (int i=0;i<size;++i){
       char key = ByteBuffer.wrap(bytes,startI,2).getChar();
@@ -129,7 +129,7 @@ class TrieNode implements Serializable{
     byte[] valueArray = entry.getValue().serialize();
     bb.putInt(valueArray.length);
     bb.put(valueArray);
-    System.out.println("SerialChildEntry total: "+trieNode.length+2+4+", entry.getKey().charValue(): "+entry.getKey().charValue()+", valueArray.length: "+valueArray.length);
+//    System.out.println("SerialChildEntry total: "+trieNode.length+2+4+", entry.getKey().charValue(): "+entry.getKey().charValue()+", valueArray.length: "+valueArray.length);
     return bb.array();
   }
 
@@ -165,15 +165,15 @@ public class Trie implements Serializable{
     if (startI==endI){
       return null;
     }
-    System.out.println("Trie deserial: start: "+startI+", endI: "+endI);
+//    System.out.println("Trie deserial: start: "+startI+", endI: "+endI);
     ByteBuffer bb = ByteBuffer.wrap(b,startI,4);
     startI+=4;
     int count = bb.getInt();
-    System.out.println("Count: "+count);
+//    System.out.println("Count: "+count);
     TrieNode node = TrieNode.deserialize(b,startI,startI+count);
-    System.out.println("node: "+node);
+//    System.out.println("node: "+node);
     startI+=count;
-    System.out.println("startI end : "+startI);
+//    System.out.println("startI end : "+startI);
     if (startI != endI){
       throw new RuntimeException("Deserialize Trie mismatches the meta data!");
     }
@@ -183,9 +183,9 @@ public class Trie implements Serializable{
   public byte[] serialize(){
 
     byte[] nodeBytes = this.root.serialize();
-    System.out.println(this.root);
+//    System.out.println(this.root);
     int memorySize = nodeBytes.length+4;
-    System.out.println("Trie Serial: memory size: "+memorySize+", count: "+count);
+//    System.out.println("Trie Serial: memory size: "+memorySize+", count: "+count);
     ByteBuffer bb = ByteBuffer.allocate(memorySize);
     bb.putInt(count);
     bb.put(nodeBytes);
@@ -413,10 +413,10 @@ public class Trie implements Serializable{
     } else if (distance == 0){
       String temp = new String(Arrays.copyOfRange(original,curr,original.length));
 //      TrieNode endNode = this.searchWordNodePos(temp,node);
-      System.out.println("temp: "+ temp+", result: "+result);
-      if (temp.equals("dd")){
-        System.out.println(node);
-      }
+//      System.out.println("temp: "+ temp+", result: "+result);
+//      if (temp.equals("dd")){
+//        System.out.println(node);
+//      }
       if (this.search(temp,node)){
         result.append(temp);
 //        System.out.println("Adding: "+result.toString());
@@ -447,7 +447,7 @@ public class Trie implements Serializable{
     if (originalLen-(remainingLen+startingLen)<distance){
 //      System.out.println("possiblePositions before deletion: ");
 //      node.possiblePosition.stream().forEach(System.out::println);
-      System.out.println("deletion: "+currChar+", result: "+result.toString());
+//      System.out.println("deletion: "+currChar+", result: "+result.toString());
       dfsGen(original,alternativeChars,curr+1,distance-1,result,canSet,node);
     }
 
@@ -466,11 +466,11 @@ public class Trie implements Serializable{
           next = node.children.get(c);
           // check if the remaining substring can existing in trie
           result.append(c);
-          System.out.println("insertion: "+c+", result: "+result.toString());
+//          System.out.println("insertion: "+c+", result: "+result.toString());
           dfsGen(original,alternativeChars,curr,distance-1,result,canSet,next);
           result.setLength(startingLen);
         }else{
-          System.out.println("Interstion space begin:");
+//          System.out.println("Interstion space begin:");
           if (node != null && node.wordCount>0 && curr!=0 && curr != originalLen&& node.next!=null){
 
             result.append(c);
@@ -478,7 +478,7 @@ public class Trie implements Serializable{
             dfsGen(original,alternativeChars,curr,distance-1,result,canSet,node.next.root);
             result.setLength(startingLen);
           }
-          System.out.println("Interstion space complete!");
+//          System.out.println("Interstion space complete!");
         }
 
 
@@ -528,7 +528,7 @@ public class Trie implements Serializable{
     result.append(currChar);
 //    System.out.println("possiblePositions before continue: ");
 //    node.possiblePosition.stream().forEach(System.out::println);
-    System.out.println("continue: "+currChar+", result: "+result.toString());
+//    System.out.println("continue: "+currChar+", result: "+result.toString());
     dfsGen(original,alternativeChars,curr+1,distance,result,canSet,next);
     result.setLength(startingLen);
   }
