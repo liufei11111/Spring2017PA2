@@ -123,7 +123,7 @@ public class LanguageModel implements Serializable {
   private  static LanguageModel deserialize(byte[] b) {
     Dictionary dic = Dictionary.deserialize(b);
     LanguageModel lmNew = new LanguageModel(dic);
-    System.out.println(lmNew.kGramTrieDict);
+//    System.out.println(lmNew.kGramTrieDict);
     return lmNew;
   }
   private  byte[] serialize() {
