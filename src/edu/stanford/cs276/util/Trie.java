@@ -39,7 +39,10 @@ class TrieNode implements Serializable{
 
   public String toString(){
     StringBuilder childrenStr = new StringBuilder();
-    children.entrySet().stream().forEach((x)->{ childrenStr.append("{"+x.getKey().toString()+"\n, "+x.getValue().toString()+"}");});
+    for (Entry<Character, TrieNode> entry: children.entrySet()){
+      childrenStr.append("{"+entry.getKey().toString()+"\n, "+entry.getValue().toString()+"}");
+    }
+//    children.entrySet().stream().forEach((x)->{ childrenStr.append("{"+x.getKey().toString()+"\n, "+x.getValue().toString()+"}");});
     return "\n{wordcount="+this.wordCount+", children: "+childrenStr+(next==null?null:", Trie: "+next.toString())+"}\n";
   }
 
