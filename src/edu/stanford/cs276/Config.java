@@ -10,4 +10,5 @@ public class Config {
   public static final double smoothingFactor = 0.1;
   public static final double eps = 1e-250;
   public static final int hashMapInitialSize = 32;
+  public static final int candidateSetSize = 10;
 }

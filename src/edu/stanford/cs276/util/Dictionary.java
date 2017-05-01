@@ -98,7 +98,22 @@ public class Dictionary implements Serializable{
     //wrong words are term level and candidate sets are query level
     populateCandset(terms,wrongWords,candidateSet);
   }
-
+  private void trimCanSetWithBigram(Set<String> canSetPerTerm,String[] terms,int i, int j){
+    // TODO: imporve Trimming
+    Set<String> reservedSet = new HashSet<>();
+    if (canSetPerTerm.size()>Config.candidateSetSize){
+      int i=0;
+      for (String str: canSetPerTerm){
+        if (i<Config.candidateSetSize){
+          reservedSet.add(str);
+          i++;
+        }else {
+          break;
+        }
+      }
+      canSetPerTerm.retainAll(reservedSet);
+    }
+  }
   private void populateCandset(String[] terms, Set<Pair<Integer, Double>> wrongWords,
       Set<Pair<String, Integer>> candidateSet) {
     List<List<Pair<String,Integer>>> eachTermSet = new ArrayList<>();
@@ -113,11 +128,13 @@ public class Dictionary implements Serializable{
         for (int j=1;j<=Config.correctionDistance;++j){
           map.dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
               ,0,i,new StringBuilder(),canSetPerTerm,map.root);
+          trimCanSetWithBigram(canSetPerTerm,terms,i,j);
           for (String str : canSetPerTerm){
             if (!termToEditDistance.containsKey(str)){
               termToEditDistance.put(str,j);
             }
           }
+
         }
       }else{
         canSetPerTerm.add(terms[i]);
