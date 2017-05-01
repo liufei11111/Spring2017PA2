@@ -35,8 +35,8 @@ public class CandidateGenerator implements Serializable {
       '8', '9', ' ', ',' };
 
   // Generate all candidates for the target query
-  public Set<Pair<String,Integer>> getCandidates(String query,Dictionary dic) throws Exception {
-    return dic.generateKoffCandidates(query,Config.distance);
+  public Set<Pair<String,Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm) throws Exception {
+    return dic.generateKoffCandidates(query,Config.distance,lm);
   }
 
 
