@@ -102,11 +102,11 @@ public class Dictionary implements Serializable{
     // TODO: imporve Trimming
     Set<String> reservedSet = new HashSet<>();
     if (canSetPerTerm.size()>Config.candidateSetSize){
-      int i=0;
+      int k=0;
       for (String str: canSetPerTerm){
-        if (i<Config.candidateSetSize){
+        if (k<Config.candidateSetSize){
           reservedSet.add(str);
-          i++;
+          k++;
         }else {
           break;
         }
