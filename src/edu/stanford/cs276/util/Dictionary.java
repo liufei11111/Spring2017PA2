@@ -62,8 +62,8 @@ public class Dictionary implements Serializable{
     allocateEditDistancesAmongTerms(terms, distance,candidateSet, lm);
     return candidateSet;
   }
-  private void addWrongTerms(String[] terms, Set<Pair<Integer,Double>> wrongWords){
-    for (int i=0;i<terms.length;++i){
+  private void addWrongTerms(String[] terms, Set<Pair<Integer,Double>> wrongWords,int distance){
+    for (int i=0;i<terms.length&&wrongWords.size()<=distance;++i){
       double score = map.unigramProbForTerm(terms[i]);
       if (score == 0.0){
         wrongWords.add(new Pair<>(i,score));
@@ -74,7 +74,7 @@ public class Dictionary implements Serializable{
   private void allocateEditDistancesAmongTerms(String[] terms,  int distance, Set<Pair<String,Integer>> candidateSet,LanguageModel lm){
     // from wrong words to score
     Set<Pair<Integer,Double>> wrongWords = new HashSet<>();
-    addWrongTerms(terms,wrongWords);
+    addWrongTerms(terms,wrongWords,distance);
     int selectedIndex = -1;
     double currentLowProd = 1;
     if (wrongWords.size()<distance){
