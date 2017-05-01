@@ -114,12 +114,15 @@ public class Dictionary implements Serializable{
               ,0,i,new StringBuilder(),canSetPerTerm,map.root);
           for (String str : canSetPerTerm){
             if (!termToEditDistance.containsKey(str)){
-              termToEditDistance.put(str,i);
+              termToEditDistance.put(str,j);
             }
           }
         }
       }else{
         canSetPerTerm.add(terms[i]);
+        if (!termToEditDistance.containsKey(terms[i])){
+          termToEditDistance.put(terms[i],0);
+        }
       }
       List<Pair<String,Integer>> eachList = new ArrayList<>();
       for (String term : canSetPerTerm){
