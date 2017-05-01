@@ -80,7 +80,7 @@ class TrieNode implements Serializable{
     if (startI==endI){
       return null;
     }
-//    System.out.println("TrieNode deserial: start: "+startI+", endI: "+endI);
+    System.out.println("TrieNode deserial: start: "+startI+", endI: "+endI);
     int numOfMetaBytes = 4*4;
     ByteBuffer bytes = ByteBuffer.wrap(bytesArray,startI,numOfMetaBytes);
     int size = bytes.getInt();
@@ -167,15 +167,15 @@ public class Trie implements Serializable{
     if (startI==endI){
       return null;
     }
-//    System.out.println("Trie deserial: start: "+startI+", endI: "+endI);
+    System.out.println("Trie deserial: start: "+startI+", endI: "+endI);
     ByteBuffer bb = ByteBuffer.wrap(b,startI,4);
     startI+=4;
     int count = bb.getInt();
-//    System.out.println("Count: "+count);
+    System.out.println("Count: "+count);
     TrieNode node = TrieNode.deserialize(b,startI,startI+count);
-//    System.out.println("node: "+node);
+    System.out.println("node: "+node);
     startI+=count;
-//    System.out.println("startI end : "+startI);
+    System.out.println("startI end : "+startI);
     if (startI != endI){
       throw new RuntimeException("Deserialize Trie mismatches the meta data!");
     }
