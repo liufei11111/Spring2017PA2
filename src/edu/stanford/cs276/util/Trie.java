@@ -122,9 +122,9 @@ class TrieNode implements Serializable{
       startI+=sizeTrieNode;
       map.put(key,trieNode);
     }
-    if (startI != endI){
-      throw new RuntimeException("Deserialization is compromised!");
-    }
+//    if (startI != endI){
+//      throw new RuntimeException("Deserialization is compromised!");
+//    }
     return map;
   }
   private byte[] serializeChildEntry(Entry<Character, TrieNode> entry) {
@@ -180,9 +180,9 @@ public class Trie implements Serializable{
     System.out.println("node: "+node);
     startI+=count;
     System.out.println("startI end : "+startI);
-    if (startI != endI){
-      throw new RuntimeException("Deserialize Trie mismatches the meta data!");
-    }
+//    if (startI != endI){
+//      throw new RuntimeException("Deserialize Trie mismatches the meta data!");
+//    }
     return new Trie(node, count);
   }
 
