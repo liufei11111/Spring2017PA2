@@ -15,7 +15,6 @@ import edu.stanford.cs276.util.Dictionary;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 /**
  * LanguageModel class constructs a language model from the training corpus.
@@ -78,13 +77,7 @@ public class LanguageModel implements Serializable {
          */
         String[] tokens = line.split(" ");
         for (int i=0;i<=tokens.length-2;++i){
-          Pair<String, String> bigramPair = new Pair<>(tokens[i],tokens[i+1]);
-          if (bigram.containsKey(bigramPair)){
-            bigram.put(bigramPair,bigram.get(bigramPair));
-          }else{
-            bigram.put(bigramPair,1);
-          }
-//            kGramTrieDict.addKGram(tokens,i,i+Config.kOfGrams);
+            kGramTrieDict.addKGram(tokens,i,i+Config.kOfGrams);
 
 
         }
@@ -112,15 +105,11 @@ public class LanguageModel implements Serializable {
   public static LanguageModel load() throws Exception {
     try {
       if (lm_ == null) {
-        FileInputStream fiA = new FileInputStream(Config.languageModelFile);
-        ObjectInputStream oisA = new ObjectInputStream(fiA);
-        lm_ = (LanguageModel) oisA.readObject();
-        for(Entry<Pair<String,String>,Integer> entry :lm_.bigram.entrySet()){
-          String[] strs = new String[2];
-          strs[0]=entry.getKey().getFirst();
-          strs[1]=entry.getKey().getSecond();
-          lm_.kGramTrieDict.addKGram(strs,0,2);
-        }
+        RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "r");
+        byte[] b = new byte[(int)f.length()];
+        f.readFully(b);
+        lm_ = LanguageModel.deserialize(b);
+        f.close();
       }
     } catch (Exception e) {
       throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
@@ -140,9 +129,8 @@ public class LanguageModel implements Serializable {
    * Saves the object (and all associated data) to disk
    */
   public void save() throws Exception {
-    FileOutputStream saveFile = new FileOutputStream(Config.languageModelFile);
-    ObjectOutputStream save = new ObjectOutputStream(saveFile);
-    save.writeObject(this);
-    save.close();
+    RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "rw");
+    f.write(this.serialize());
+    f.close();
   }
 }
