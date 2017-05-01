@@ -29,7 +29,7 @@ public class LanguageModel implements Serializable {
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
   HashMap<String,Integer> map = new HashMap<>();
-  HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
+  public HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
   Dictionary kGramTrieDict = null;
 //  byte[] kGramStorageState = null;
 
@@ -148,6 +148,7 @@ public class LanguageModel implements Serializable {
           String[] strs = new String[1];
           strs[0]=entry.getKey();
           lm_.kGramTrieDict.addKGram(strs,0,1,entry.getValue());
+          lm_.map.clear();
         }
 //        lm_.kGramStorageState = lm_.serialize();
 //        lm_.kGramStorageState = null;

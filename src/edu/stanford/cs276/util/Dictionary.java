@@ -3,6 +3,7 @@ package edu.stanford.cs276.util;
 
 import edu.stanford.cs276.CandidateGenerator;
 import edu.stanford.cs276.Config;
+import edu.stanford.cs276.LanguageModel;
 import edu.stanford.cs276.NoisyChannelModel;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -54,11 +55,11 @@ public class Dictionary implements Serializable{
 //    return map.searchWordNodePos(term).wordCount;
 //  }
 
-  public Set<Pair<String,Integer>> generateKoffCandidates(String query, int distance){
+  public Set<Pair<String,Integer>> generateKoffCandidates(String query, int distance, LanguageModel lm){
     Set<Pair<String,Integer>> candidateSet = new HashSet<>();
     candidateSet.add(new Pair<String, Integer>(query,0));
     String[] terms = query.split(" ");
-    allocateEditDistancesAmongTerms(terms, distance,candidateSet);
+    allocateEditDistancesAmongTerms(terms, distance,candidateSet, lm);
     return candidateSet;
   }
   private void addWrongTerms(String[] terms, Set<Pair<Integer,Double>> wrongWords){
@@ -70,7 +71,7 @@ public class Dictionary implements Serializable{
     }
   }
 
-  private void allocateEditDistancesAmongTerms(String[] terms,  int distance, Set<Pair<String,Integer>> candidateSet){
+  private void allocateEditDistancesAmongTerms(String[] terms,  int distance, Set<Pair<String,Integer>> candidateSet,LanguageModel lm){
     // from wrong words to score
     Set<Pair<Integer,Double>> wrongWords = new HashSet<>();
     addWrongTerms(terms,wrongWords);
@@ -83,7 +84,7 @@ public class Dictionary implements Serializable{
         }
         // we use bigram to decide which word is wrong. We don't need K gram for this. Rather, we use
         // K gram for deciding which candidate is the best corrected one.
-        double scoreBigram = map.getBigramProbFor(terms,i)*map.unigramProbForTerm(terms[i]);
+        double scoreBigram = map.getBigramProbFor(terms,i,lm)*map.unigramProbForTerm(terms[i]);
         if (scoreBigram<currentLowProd){
           selectedIndex = i;
           currentLowProd = scoreBigram;
@@ -149,7 +150,7 @@ public class Dictionary implements Serializable{
       }
     }
   }
-  public String getCorrectedQuery(String original, Set<Pair<String,Integer>> queries,NoisyChannelModel ncm) {
+  public String getCorrectedQuery(String original, Set<Pair<String,Integer>> queries,NoisyChannelModel ncm, LanguageModel lm) {
     Double probLowThreshold = Double.MIN_VALUE;
     Pair<String, Double> thePair = null;
     for (Pair<String, Integer> query: queries){
@@ -157,14 +158,14 @@ public class Dictionary implements Serializable{
         thePair = new Pair<>(query.getFirst(),probLowThreshold);
         continue;
       }
-      dfsWithTruncation(original, query, thePair, ncm);
+      dfsWithTruncation(original, query, thePair, ncm, lm);
     }
     if (thePair == null){
       throw new RuntimeException("Forbidden query cands without a single result!");
     }
     return thePair.getFirst();
   }
-  public void dfsWithTruncation(String orignal, Pair<String,Integer> query, Pair<String, Double> thePair,NoisyChannelModel ncm){
+  public void dfsWithTruncation(String orignal, Pair<String,Integer> query, Pair<String, Double> thePair,NoisyChannelModel ncm, LanguageModel lm){
     String canQuery = query.getFirst();
     int editDiff = query.getSecond();
     double runningMax = thePair.getSecond();
@@ -175,17 +176,17 @@ public class Dictionary implements Serializable{
     }
     double bayesEstimateLog = noiseChannel;
     String[] terms = canQuery.split(" ");
-    biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog);
+    biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
   }
-  private void biGramJointProbForTerms(String[] terms, int i, Trie map, Pair<String, Double> thePair, Pair<String,Integer> query, double bayesEstimateLog){
+  private void biGramJointProbForTerms(String[] terms, int i, Trie map, Pair<String, Double> thePair, Pair<String,Integer> query, double bayesEstimateLog, LanguageModel lm){
     if (bayesEstimateLog <= thePair.getSecond()){
       return;
     }
     if (i==0){
       bayesEstimateLog += Math.log(map.unigramProbForTerm(terms[i])+Config.eps);
-      biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog);
+      biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
     }else if (i==terms.length-2){
-      bayesEstimateLog += Math.log(map.getBigramProbFor(terms,i)+Config.eps);
+      bayesEstimateLog += Math.log(map.getBigramProbFor(terms,i,lm)+Config.eps);
       if (bayesEstimateLog> thePair.getSecond()){
         thePair.setFirst(query.getFirst());
         thePair.setSecond(bayesEstimateLog);
@@ -193,8 +194,8 @@ public class Dictionary implements Serializable{
     }else if (i>terms.length-1){
       return;
     }else{
-      bayesEstimateLog += Math.log(map.getBigramProbFor(terms,i)+Config.eps);
-      biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog);
+      bayesEstimateLog += Math.log(map.getBigramProbFor(terms,i,lm)+Config.eps);
+      biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
 
     }
 

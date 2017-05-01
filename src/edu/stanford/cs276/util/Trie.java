@@ -2,6 +2,7 @@ package edu.stanford.cs276.util;
 
 import edu.stanford.cs276.CandidateGenerator;
 import edu.stanford.cs276.Config;
+import edu.stanford.cs276.LanguageModel;
 import java.io.ByteArrayInputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -396,20 +397,20 @@ public class Trie implements Serializable{
       return node.wordCount*1.0/this.count;
     }
   }
-  public Double getBigramProbFor(String[] terms, int startI){
+  public Double getBigramProbFor(String[] terms, int startI, LanguageModel lm){
     double unigramLogProd = 0.0;
     if (startI<=terms.length-1){
       TrieNode node = searchWordNodePos(terms[startI]);
       if (node !=null){
         unigramLogProd = node.wordCount*1.0/this.count;
       }
-      TrieNode biNode = searchWordNodePos(terms,startI,startI+2,this);
+//      TrieNode biNode = searchWordNodePos(terms,startI,startI+2,this);
       double bigramWordCount = 0.0;
       if (node != null){
-        bigramWordCount = node.wordCount;
+        bigramWordCount = lm.bigram.get(new Pair<>(terms[0],terms[1]));
       }
 
-      return Config.smoothingFactor*unigramProbForTerm(terms[startI])+(1-Config.smoothingFactor)*bigramWordCount/node.wordCount;
+      return Config.smoothingFactor*unigramLogProd+(1-Config.smoothingFactor)*bigramWordCount/node.wordCount;
     }else{
       return 0.0;
     }
