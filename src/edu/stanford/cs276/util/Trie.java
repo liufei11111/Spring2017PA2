@@ -169,8 +169,11 @@ public class Trie implements Serializable{
     ByteBuffer bb = ByteBuffer.wrap(b,startI,4);
     startI+=4;
     int count = bb.getInt();
+    System.out.println("Count: "+count);
     TrieNode node = TrieNode.deserialize(b,startI,startI+count);
+    System.out.println("node: "+node);
     startI+=count;
+    System.out.println("startI end : "+startI);
     if (startI != endI){
       throw new RuntimeException("Deserialize Trie mismatches the meta data!");
     }
