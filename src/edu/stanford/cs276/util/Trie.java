@@ -76,11 +76,11 @@ class TrieNode implements Serializable{
 
 
 
-  public static synchronized  TrieNode deserialize(byte[]  bytesArray, int startI, int endI){
+  public static TrieNode deserialize(byte[]  bytesArray, int startI, int endI){
     if (startI==endI){
       return null;
     }
-    System.out.println("TrieNode deserial: start1: "+startI+", endI: "+endI);
+    System.err.println("errTrieNode deserial: start1: "+startI+", endI: "+endI);
     int numOfMetaBytes = 4*4;
     ByteBuffer bytes = ByteBuffer.wrap(bytesArray,startI,numOfMetaBytes);
     int size = bytes.getInt();
@@ -88,19 +88,19 @@ class TrieNode implements Serializable{
     int childrenByteSize = bytes.getInt();
     int sizeOfTrie = bytes.getInt();
     startI += numOfMetaBytes;
-    System.out.println("TrieNode deserial: start2: "+startI+", endI: "+endI);
+    System.err.println("errTrieNode deserial: start2: "+startI+", endI: "+endI);
     HashMap<Character,TrieNode> map = parseChildrenFromBytes(bytesArray, startI,startI+childrenByteSize, size);
-    System.out.println("TrieNode deserial: start3: "+startI+", endI: "+endI);
+    System.err.println("errTrieNode deserial: start3: "+startI+", endI: "+endI);
     startI +=childrenByteSize;
     Trie nextTrie = null;
-    System.out.println("TrieNode deserial: start4: "+startI+", endI: "+endI);
+    System.err.println("errTrieNode deserial: start4: "+startI+", endI: "+endI);
     if (sizeOfTrie !=0){
       nextTrie = Trie.deserialize(bytesArray,startI,startI+sizeOfTrie);
       startI+=sizeOfTrie;
     }
 
     if (startI != endI){
-      System.out.println("StartI 5: "+startI+", EndI: "+endI);
+      System.out.println("errStartI 5: "+startI+", EndI: "+endI);
       throw new RuntimeException("Deserialize TrieNode mistaches!");
     }
     return new TrieNode(nextTrie,map,wordCount);
