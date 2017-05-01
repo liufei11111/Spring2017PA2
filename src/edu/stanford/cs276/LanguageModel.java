@@ -30,7 +30,7 @@ public class LanguageModel implements Serializable {
   private static LanguageModel lm_;
   HashMap<String,Integer> map = new HashMap<>();
   HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
-  Dictionary kGramTrieDict = new Dictionary();
+  Dictionary kGramTrieDict = null;
   byte[] kGramStorageState = null;
 
   /*
@@ -50,11 +50,11 @@ public class LanguageModel implements Serializable {
    * For more info about the Singleton pattern, see https://en.wikipedia.org/wiki/Singleton_pattern.  
    */
   private LanguageModel(String corpusFilePath) throws Exception {
+    kGramTrieDict = new Dictionary();
     constructDictionaries(corpusFilePath);
+
   }
-  private LanguageModel(Dictionary dic) {
-    this.kGramTrieDict = dic;
-  }
+
 
   /**
    * This method is called by the constructor, and computes language model parameters 
