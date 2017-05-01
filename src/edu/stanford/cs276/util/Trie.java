@@ -12,15 +12,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 class TrieNode implements Serializable{
   // Initialize your data structure here.
 //  char c;
 
   public Trie next;
-  HashMap<Character, TrieNode> children = new HashMap<Character, TrieNode>(Config.hashMapInitialSize);// don't need that much space
+  Map<Character, TrieNode> children = new TreeMap<Character, TrieNode>();// don't need that much space
   int wordCount;
 //  Set<Integer> possiblePosition= new HashSet<Integer>();
   public TrieNode(){
@@ -242,7 +244,7 @@ public class Trie implements Serializable{
     if (index==words.size()){return;}
     TrieNode cur = this.root;
 //      TrieNode head = cur;
-    HashMap<Character, TrieNode> curChildren = cur.children;
+    Map<Character, TrieNode> curChildren = cur.children;
     char[] wordArray = words.get(index).toCharArray();
 //    System.out.println("insertWord: "+word+", possible position add: "+wordArray.length);
 //    cur.possiblePosition.add(wordArray.length);
@@ -351,7 +353,7 @@ public class Trie implements Serializable{
   }
   public TrieNode searchWordNodePos(char[] s, TrieNode node){
     if (s.length == 0 || node==null){return node;}
-    HashMap<Character, TrieNode> children = node.children;
+    Map<Character, TrieNode> children = node.children;
     TrieNode cur = null;
     char[] sArray = s;
     for(int i = 0; i < sArray.length; i++){
@@ -367,7 +369,7 @@ public class Trie implements Serializable{
   }
   public TrieNode searchWordNodePos(String[] strs, int startI, int endI, Trie map){
     if (startI >= endI||map==null){return null;}
-    HashMap<Character, TrieNode> children = map.root.children;
+    Map<Character, TrieNode> children = map.root.children;
     TrieNode cur = null;
     char[] sArray = strs[startI].toCharArray();
     for(int i = 0; i < sArray.length; i++){
