@@ -91,7 +91,7 @@ public class LanguageModel implements Serializable {
             }
           }
           if (map.containsKey(tokens[i])){
-            map.put(tokens[i],map.get(tokens[i]+1));
+            map.put(tokens[i],map.get(tokens[i])+1);
           }else{
             map.put(tokens[i],1);
           }
