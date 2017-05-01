@@ -112,7 +112,8 @@ public class LanguageModel implements Serializable {
         f.close();
       }
     } catch (Exception e) {
-      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
+      throw e;
+//      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
     }
     return lm_;
   }
