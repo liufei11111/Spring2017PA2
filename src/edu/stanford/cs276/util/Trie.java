@@ -91,10 +91,12 @@ class TrieNode implements Serializable{
     HashMap<Character,TrieNode> map = parseChildrenFromBytes(bytesArray, startI,startI+childrenByteSize, size);
     startI +=childrenByteSize;
     Trie nextTrie = null;
+    System.out.println("TrieNode deserial: start: "+startI+", endI: "+endI);
     if (sizeOfTrie !=0){
       nextTrie = Trie.deserialize(bytesArray,startI,startI+sizeOfTrie);
       startI+=sizeOfTrie;
     }
+    System.out.println("TrieNode deserial: start: "+startI+", endI: "+endI);
     if (startI != endI){
       System.out.println("StartI: "+startI+", EndI: "+endI);
       throw new RuntimeException("Deserialize TrieNode mistaches!");
@@ -103,7 +105,7 @@ class TrieNode implements Serializable{
   }
   private static HashMap<Character,TrieNode> parseChildrenFromBytes(byte[] bytes, int startI, int endI, int size) {
     if (startI==endI){
-      return null;
+      return new HashMap<>(1);
     }
     System.out.println("parseChildrenFromBytes parse: startIe: "+startI+", endI: "+endI+", size: "+size);
     HashMap<Character, TrieNode> map = new HashMap<Character,TrieNode>(Config.hashMapInitialSize);
