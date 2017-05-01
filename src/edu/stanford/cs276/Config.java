@@ -9,5 +9,5 @@ public class Config {
   public static final int kOfGrams = 2;
   public static final double smoothingFactor = 0.1;
   public static final double eps = 1e-250;
-  public static final int hashMapInitialSize = 16;
+  public static final int hashMapInitialSize = 2;
 }
