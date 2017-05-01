@@ -45,10 +45,10 @@ public class Dictionary implements Serializable{
     list.add(term);
     map.insert(list);
   }
-  public void addKGram(String[] terms, int startI, int endI) {
+  public void addKGram(String[] terms, int startI, int endI,int count) {
 //    termCount++;
     List<String> list = Arrays.asList(terms);
-    map.insert(list.subList(startI,endI));
+    map.insert(list.subList(startI,endI),0,count);
   }
 //  public int count(String term) {
 //    return map.searchWordNodePos(term).wordCount;

@@ -15,6 +15,7 @@ import edu.stanford.cs276.util.Dictionary;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 /**
  * LanguageModel class constructs a language model from the training corpus.
@@ -28,7 +29,7 @@ public class LanguageModel implements Serializable {
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
 //  HashMap<String,Integer> map = new HashMap<>();
-//  HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
+  HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
   Dictionary kGramTrieDict = new Dictionary();
 
   /*
@@ -79,8 +80,13 @@ public class LanguageModel implements Serializable {
         for (int i=0;i<=tokens.length-2;++i){
 //            System.out.println("Line: "+line);
 //            System.out.println("Tokens: "+Arrays.toString(tokens));
-            kGramTrieDict.addKGram(tokens,i,i+Config.kOfGrams);
-
+//            kGramTrieDict.addKGram(tokens,i,i+Config.kOfGrams);
+          Pair<String,String> bigramPair = new Pair<>(tokens[i],tokens[i+1]);
+          if (bigram.containsKey(bigramPair)){
+            bigram.put(bigramPair,bigram.get(bigramPair)+1);
+          }else{
+            bigram.put(bigramPair,1);
+          }
 
         }
 
@@ -105,17 +111,34 @@ public class LanguageModel implements Serializable {
    * Loads the language model object (and all associated data) from disk
    */
   public static LanguageModel load() throws Exception {
+//    try {
+//      if (lm_ == null) {
+//        RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "r");
+//        byte[] b = new byte[(int)f.length()];
+//        f.readFully(b);
+//        lm_ = LanguageModel.deserialize(b);
+//        f.close();
+//      }
+//    } catch (Exception e) {
+//      throw e;
+////      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
+//    }
+//    return lm_;
     try {
       if (lm_ == null) {
-        RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "r");
-        byte[] b = new byte[(int)f.length()];
-        f.readFully(b);
-        lm_ = LanguageModel.deserialize(b);
-        f.close();
+        FileInputStream fiA = new FileInputStream(Config.languageModelFile);
+        ObjectInputStream oisA = new ObjectInputStream(fiA);
+        lm_ = (LanguageModel) oisA.readObject();
+        for (Entry<Pair<String,String>,Integer> entry : lm_.bigram.entrySet()){
+          String[] strs = new String[2];
+          strs[0]=entry.getKey().getFirst();
+          strs[1]=entry.getKey().getSecond();
+          lm_.kGramTrieDict.addKGram(strs,0,2,entry.getValue());
+        }
+
       }
     } catch (Exception e) {
-      throw e;
-//      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
+      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
     }
     return lm_;
   }
@@ -133,8 +156,12 @@ public class LanguageModel implements Serializable {
    * Saves the object (and all associated data) to disk
    */
   public void save() throws Exception {
-    RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "rw");
-    f.write(this.serialize());
-    f.close();
+//    RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "rw");
+//    f.write(this.serialize());
+//    f.close();
+    FileOutputStream saveFile = new FileOutputStream(Config.languageModelFile);
+    ObjectOutputStream save = new ObjectOutputStream(saveFile);
+    save.writeObject(this);
+    save.close();
   }
 }
