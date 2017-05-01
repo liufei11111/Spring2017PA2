@@ -28,9 +28,10 @@ public class LanguageModel implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
-//  HashMap<String,Integer> map = new HashMap<>();
+  HashMap<String,Integer> map = new HashMap<>();
   HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
   Dictionary kGramTrieDict = new Dictionary();
+  byte[] kGramStorageState = null;
 
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
@@ -77,20 +78,34 @@ public class LanguageModel implements Serializable {
          *
          */
         String[] tokens = line.split(" ");
-        for (int i=0;i<=tokens.length-2;++i){
+        for (int i=0;i<tokens.length;++i){
 //            System.out.println("Line: "+line);
 //            System.out.println("Tokens: "+Arrays.toString(tokens));
 //            kGramTrieDict.addKGram(tokens,i,i+Config.kOfGrams);
-          Pair<String,String> bigramPair = new Pair<>(tokens[i],tokens[i+1]);
-          if (bigram.containsKey(bigramPair)){
-            bigram.put(bigramPair,bigram.get(bigramPair)+1);
-          }else{
-            bigram.put(bigramPair,1);
+          if (i!=tokens.length-1){
+            Pair<String,String> bigramPair = new Pair<>(tokens[i],tokens[i+1]);
+            if (bigram.containsKey(bigramPair)){
+              bigram.put(bigramPair,bigram.get(bigramPair)+1);
+            }else{
+              bigram.put(bigramPair,1);
+            }
           }
+          if (map.containsKey(tokens[i])){
+            map.put(tokens[i],map.get(tokens[i]+1));
+          }else{
+            map.put(tokens[i],1);
+          }
+//          kGramTrieDict.add(tokens[i]);
 
         }
 
       }
+      for (Entry<String,Integer> entry: map.entrySet()){
+        String[] strs = new String[1];
+        strs[0]=entry.getKey();
+        kGramTrieDict.addKGram(strs,0,1,entry.getValue());
+      }
+      map.clear();
       input.close();
     }
     System.out.println("Done.");
@@ -129,13 +144,15 @@ public class LanguageModel implements Serializable {
         FileInputStream fiA = new FileInputStream(Config.languageModelFile);
         ObjectInputStream oisA = new ObjectInputStream(fiA);
         lm_ = (LanguageModel) oisA.readObject();
-        for (Entry<Pair<String,String>,Integer> entry : lm_.bigram.entrySet()){
-          String[] strs = new String[2];
-          strs[0]=entry.getKey().getFirst();
-          strs[1]=entry.getKey().getSecond();
-          lm_.kGramTrieDict.addKGram(strs,0,2,entry.getValue());
-        }
-
+//        for (Entry<Pair<String,String>,Integer> entry : lm_.bigram.entrySet()){
+//          String[] strs = new String[2];
+//          strs[0]=entry.getKey().getFirst();
+//          strs[1]=entry.getKey().getSecond();
+//          lm_.kGramTrieDict.addKGram(strs,0,2,entry.getValue());
+//        }
+        lm_.kGramStorageState = lm_.serialize();
+        lm_.kGramStorageState = null;
+        lm_.kGramTrieDict = LanguageModel.deserialize(lm_.kGramStorageState );
       }
     } catch (Exception e) {
       throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
@@ -143,11 +160,11 @@ public class LanguageModel implements Serializable {
     return lm_;
   }
 
-  private  static LanguageModel deserialize(byte[] b) {
+  private  static Dictionary deserialize(byte[] b) {
     Dictionary dic = Dictionary.deserialize(b);
-    LanguageModel lmNew = new LanguageModel(dic);
+//    LanguageModel lmNew = new LanguageModel(dic);
 //    System.out.println(lmNew.kGramTrieDict);
-    return lmNew;
+    return dic;
   }
   private  byte[] serialize() {
     return kGramTrieDict.serialize();
@@ -161,6 +178,8 @@ public class LanguageModel implements Serializable {
 //    f.close();
     FileOutputStream saveFile = new FileOutputStream(Config.languageModelFile);
     ObjectOutputStream save = new ObjectOutputStream(saveFile);
+    this.kGramStorageState = this.serialize();
+    this.kGramTrieDict = null;
     save.writeObject(this);
     save.close();
   }
