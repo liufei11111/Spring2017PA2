@@ -75,7 +75,7 @@ public class RunCorrector {
     FileWriter fw = new FileWriter(new File("/tmp/pa2-diff.txt"));
     while ((query = queriesFileReader.readLine()) != null) {
       Set<Pair<String,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict);
-      String correctedQuery =  languageModel.kGramTrieDict.getCorrectedQuery(query,queries,nsm);
+      String correctedQuery =  languageModel.kGramTrieDict.getCorrectedQuery(query,queries,nsm,languageModel);
       /*
        * Your code here: currently the correctQuery and original query are the same
        * Complete this implementation so that the spell corrector corrects the 
