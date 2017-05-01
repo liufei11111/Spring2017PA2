@@ -76,6 +76,7 @@ public class RunCorrector {
     while ((query = queriesFileReader.readLine()) != null) {
       Set<Pair<String,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict,languageModel);
       String correctedQuery =  languageModel.kGramTrieDict.getCorrectedQuery(query,queries,nsm,languageModel);
+      queries.clear();
       /*
        * Your code here: currently the correctQuery and original query are the same
        * Complete this implementation so that the spell corrector corrects the 
