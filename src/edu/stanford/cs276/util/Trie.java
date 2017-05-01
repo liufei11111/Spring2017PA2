@@ -66,7 +66,8 @@ class TrieNode implements Serializable{
     bb.putInt(wordCount);
     bb.putInt(childrenByteSize);
     bb.putInt(sizeOfTrie);
-
+    System.out.println("Serialize TrieNode: size: "+size+", wordCount: "+wordCount
+        +", childrenByteSize: "+childrenByteSize+",sizeOfTrie "+sizeOfTrie);
     for (byte[] array : listAssetBytes){
       bb.put(array);
     }
@@ -76,6 +77,7 @@ class TrieNode implements Serializable{
 
 
   public static TrieNode deserialize(byte[]  bytesArray, int startI, int endI){
+    System.out.println("TrieNode deserial: start: "+startI+", endI: "+endI);
     int numOfMetaBytes = 4*4;
     ByteBuffer bytes = ByteBuffer.wrap(bytesArray,startI,startI+numOfMetaBytes);
     int size = bytes.getInt();
@@ -97,6 +99,7 @@ class TrieNode implements Serializable{
     return new TrieNode(nextTrie,map,wordCount);
   }
   private static HashMap<Character,TrieNode> parseChildrenFromBytes(byte[] bytes, int startI, int endI, int size) {
+    System.out.println("parseChildrenFromBytes parse: startIe: "+startI+", endI: "+endI+", size: "+size);
     HashMap<Character, TrieNode> map = new HashMap<Character,TrieNode>(Config.hashMapInitialSize);
     for (int i=0;i<size;++i){
       char key = ByteBuffer.wrap(bytes,startI,startI+2).getChar();
@@ -113,12 +116,14 @@ class TrieNode implements Serializable{
     return map;
   }
   private byte[] serializeChildEntry(Entry<Character, TrieNode> entry) {
+
     byte[] trieNode = entry.getValue().serialize();
     ByteBuffer bb = ByteBuffer.allocate(trieNode.length+2+4);// char is of size 2
     bb.putChar(entry.getKey().charValue());
     byte[] valueArray = entry.getValue().serialize();
     bb.putInt(valueArray.length);
     bb.put(valueArray);
+    System.out.println("SerialChildEntry total: "+trieNode.length+2+4+", entry.getKey().charValue(): "+entry.getKey().charValue()+", valueArray.length: "+valueArray.length);
     return bb.array();
   }
 
@@ -151,7 +156,7 @@ public class Trie implements Serializable{
 //    next = null;
   }
   public static Trie deserialize(byte[] b, int startI, int endI){
-
+    System.out.println("Trie deserial: start: "+startI+", endI: "+endI);
     ByteBuffer bb = ByteBuffer.wrap(b,startI,startI+4);
     startI+=4;
     int count = bb.getInt();
@@ -164,8 +169,10 @@ public class Trie implements Serializable{
   }
 
   public byte[] serialize(){
+
     byte[] nodeBytes = this.root.serialize();
     int memorySize = nodeBytes.length+4;
+    System.out.println("Trie Serial: memory size: "+memorySize+", count: "+count);
     ByteBuffer bb = ByteBuffer.allocate(memorySize);
     bb.putInt(count);
     bb.put(nodeBytes);
