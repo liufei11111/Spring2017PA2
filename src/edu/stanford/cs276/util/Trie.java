@@ -227,7 +227,7 @@ public class Trie implements Serializable{
     insert(words,0);
   }
   private void insert(List<String> words, int index) {
-
+    insert(words,index,1);
   }
   private void insert(List<String> words, int index, int count) {
     if (index==words.size()){return;}
