@@ -148,14 +148,16 @@ public class LanguageModel implements Serializable {
           String[] strs = new String[1];
           strs[0]=entry.getKey();
           lm_.kGramTrieDict.addKGram(strs,0,1,entry.getValue());
-          lm_.map.clear();
+
         }
+        lm_.map.clear();
 //        lm_.kGramStorageState = lm_.serialize();
 //        lm_.kGramStorageState = null;
 //        lm_.kGramTrieDict = LanguageModel.deserialize(lm_.kGramStorageState );
       }
     } catch (Exception e) {
-      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
+      throw e;
+//      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
     }
     return lm_;
   }
