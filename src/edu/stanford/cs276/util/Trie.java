@@ -407,7 +407,8 @@ public class Trie implements Serializable{
 //      TrieNode biNode = searchWordNodePos(terms,startI,startI+2,this);
       double bigramWordCount = 0.0;
       if (node != null){
-        bigramWordCount = lm.bigram.getOrDefault(new Pair<>(terms[0],terms[1]),0);
+        Integer temp = lm.bigram.get(new Pair<>(terms[0],terms[1]));
+        bigramWordCount = temp == null? 0.0:temp;
       }
 
       return Config.smoothingFactor*unigramLogProd+(1-Config.smoothingFactor)*bigramWordCount/node.wordCount;
