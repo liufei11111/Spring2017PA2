@@ -104,8 +104,8 @@ public class RunCorrector {
          * diverges from the gold file, what type of errors are more common etc. This might
          * help you improve your candidate generation/scoring steps 
          */
-        if (!goldQuery.equals(correctedQuery)){
-          fw.write("GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery+"\n");
+        if (!goldQuery.equals(correctedQuery.getFirst())){
+          fw.write("GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
         }
 
       }
