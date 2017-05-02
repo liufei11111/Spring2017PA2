@@ -444,7 +444,7 @@ public class Trie implements Serializable{
       return;
     }
     if (curr == original.length){
-      if( node != null ){
+      if( node != null && distance == 1){
         suffixDFS(node,distance,canSet,result);
         result.setLength(startingLen);
       }
