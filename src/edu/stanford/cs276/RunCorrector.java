@@ -114,7 +114,7 @@ public class RunCorrector {
        * IMPORTANT: In your final submission DO NOT add any additional print statements as 
        * this will interfere with the autograder
        */
-      System.out.println(correctedQuery);
+      System.out.println(correctedQuery.getFirst());
     }
     fw.close();
     queriesFileReader.close();
