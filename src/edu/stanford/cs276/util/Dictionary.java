@@ -106,7 +106,7 @@ public class Dictionary implements Serializable{
       // from candidate word to edit distance
       Set<Pair<String,Integer>> canSetPerTerm = new HashSet<>();
       if (markedWords.contains(i)){
-          PriorityQueue<Pair<String,Double>> topSelector = new PriorityQueue<>(Config.candidateSetSize);
+          PriorityQueue<Pair<String,Double>> topSelector = new PriorityQueue<>(Config.candidateSetSize,new StringDoublePairAscendingComparator());
           map.dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
               ,0,Config.correctionDistance,new StringBuilder(),topSelector,map.root,lm, i==0?null:terms[i-1]);
 //          trimCanSetWithBigram(canSetPerTerm,terms,i,lm);
