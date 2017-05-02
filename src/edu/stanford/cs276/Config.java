@@ -12,7 +12,7 @@ public class Config {
   public static final double languageModelScalingFactor = 1.0;
   public static final double eps = 1e-250;
   public static final int hashMapInitialSize = 8;
-  public static final int candidateSetSize = 2;
+  public static final int candidateSetSize = 10;
   public static final double charEditProb = 0.01;// arbitrary assumption.
   public static final Double logNoOpProb = Math.log(0.95);
 }
