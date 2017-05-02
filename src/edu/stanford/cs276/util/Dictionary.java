@@ -86,7 +86,7 @@ public class Dictionary implements Serializable{
             wrongWords.poll();
             // unigram is tie breaker for two terms
             wrongWords.add(new Pair<>(i+1,scoreBigram));
-            wrongWords.add(new Pair<>(i,scoreBigram));
+//            wrongWords.add(new Pair<>(i,scoreBigram));
           }
         }
       }
@@ -105,21 +105,20 @@ public class Dictionary implements Serializable{
     }
     for (int i=0;i<terms.length;++i){
       // from candidate word to edit distance
-      Set<Pair<String,Integer>> canSetPerTerm = new HashSet<>();
+      List<Pair<String,Integer>> canSetPerTerm = new ArrayList<>();
       if (markedWords.contains(i)){
           PriorityQueue<Pair<String,Double>> topSelector = new PriorityQueue<>(Config.candidateSetSize,new StringDoublePairAscendingComparator());
+          Map<String,Integer> termToEdit = new HashMap<>();
           map.dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
-              ,0,Config.correctionDistance,new StringBuilder(),topSelector,map.root,lm, i==0?null:terms[i-1]);
-//          trimCanSetWithBigram(canSetPerTerm,terms,i,lm);
-
+              ,0,Config.correctionDistance,new StringBuilder(),topSelector,termToEdit,map.root,lm, i==0?null:terms[i-1]);
+          for (Pair<String,Double> pair: topSelector){
+            canSetPerTerm.add(new Pair<>(pair.getFirst(),termToEdit.get(pair.getFirst())));
+          }
       }else{
         canSetPerTerm.add(new Pair<>(terms[i],0));
       }
-      List<Pair<String,Integer>> eachList = new ArrayList<>();
-      for (Pair<String,Integer> term : canSetPerTerm){
-        eachList.add(term);
-      }
-      listOfCandLists.add(eachList);
+
+      listOfCandLists.add(canSetPerTerm);
     }
     StringBuilder sb = new StringBuilder();
 

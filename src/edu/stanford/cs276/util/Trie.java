@@ -137,9 +137,18 @@ public  class Trie implements Serializable{
     return cur;
   }
 
-  private void updateCandidateSet(StringBuilder result, String prevString,LanguageModel lm, PriorityQueue<Pair<String, Double>> canSet){
+  private void updateCandidateSet(StringBuilder result, String prevString,LanguageModel lm, PriorityQueue<Pair<String, Double>> canSet, Map<String,Integer> termToEdit, int remainingEditsAllowed){
     String newCan = result.toString();
-
+    if (!termToEdit.containsKey(newCan)){
+      termToEdit.put(newCan,Config.correctionDistance-remainingEditsAllowed);
+    }else{
+      int currEditDiff = termToEdit.get(newCan);
+      int newEditDiff = Config.correctionDistance-remainingEditsAllowed;
+      if (currEditDiff > newEditDiff){
+        termToEdit.put(newCan,newEditDiff);
+      }
+        return;
+    }
 //        System.out.println("Adding: "+result.toString());
     double newCanScore = lm.getBigramProbFor(prevString,newCan);
     if (canSet.size()< Config.candidateSetSize){
@@ -153,7 +162,7 @@ public  class Trie implements Serializable{
     }
   }
   public void dfsGen(char[] original, Set<Character> alternativeChars, int curr, int distance,
-      StringBuilder result, PriorityQueue<Pair<String, Double>> canSet, TrieNode node,
+      StringBuilder result, PriorityQueue<Pair<String, Double>> canSet,  Map<String,Integer> termToEdit , TrieNode node,
       LanguageModel lm, String prevString){
     int originalLen = original.length;
     int remainingLen = originalLen-curr;
@@ -170,14 +179,14 @@ public  class Trie implements Serializable{
 //      }
       if (this.search(temp,node)){
         result.append(temp);
-        updateCandidateSet(result,prevString, lm, canSet);
+        updateCandidateSet(result,prevString, lm, canSet, termToEdit, distance);
         result.setLength(startingLen);
       }
       return;
     }
     if (curr == original.length){
-      if( node != null && distance == 1){
-        suffixDFS(node,distance,canSet,result, prevString, lm);
+      if( node != null && distance >0){
+        suffixDFS(node,distance,canSet,result, prevString, lm,termToEdit,distance);
         result.setLength(startingLen);
       }
       return;
@@ -198,7 +207,7 @@ public  class Trie implements Serializable{
 //      System.out.println("possiblePositions before deletion: ");
 //      node.possiblePosition.stream().forEach(System.out::println);
 //      System.out.println("deletion: "+currChar+", result: "+result.toString());
-      dfsGen(original,alternativeChars,curr+1,distance-1,result,canSet,node, lm,prevString);
+      dfsGen(original,alternativeChars,curr+1,distance-1,result,canSet,termToEdit,node, lm,prevString);
     }
 
 
@@ -217,7 +226,7 @@ public  class Trie implements Serializable{
           // check if the remaining substring can existing in trie
           result.append(c);
 //          System.out.println("insertion: "+c+", result: "+result.toString());
-          dfsGen(original,alternativeChars,curr,distance-1,result,canSet,next, lm,prevString);
+          dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit,next, lm,prevString);
           result.setLength(startingLen);
         }else{
 //          System.out.println("Interstion space begin:");
@@ -225,7 +234,7 @@ public  class Trie implements Serializable{
 
             result.append(c);
 //            System.out.println("insertion: <space>, result: "+result.toString());
-            dfsGen(original,alternativeChars,curr,distance-1,result,canSet,root, lm,prevString);
+            dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit, root, lm,prevString);
             result.setLength(startingLen);
           }
 //          System.out.println("Interstion space complete!");
@@ -247,7 +256,7 @@ public  class Trie implements Serializable{
 //        if (node.possiblePosition.contains(remainingLen)) {
           result.append(c);
 //          System.out.println("substitute: " + currChar+" to "+c + ", result: " + result.toString());
-          dfsGen(original, alternativeChars, curr + 1, distance - 1, result, canSet, next, lm,prevString);
+          dfsGen(original, alternativeChars, curr + 1, distance - 1, result, canSet,termToEdit,next, lm,prevString);
           result.setLength(startingLen);
 //        }
         }
@@ -265,7 +274,7 @@ public  class Trie implements Serializable{
 //          if (node.possiblePosition.contains(remainingLen)){
             result.append(nextChar);
             result.append(currChar);
-            dfsGen(original,alternativeChars,curr+2,distance-1,result,canSet,nextNext, lm,prevString);
+            dfsGen(original,alternativeChars,curr+2,distance-1,result,canSet,termToEdit,nextNext, lm,prevString);
             result.setLength(startingLen);
 //          }
 
@@ -279,20 +288,20 @@ public  class Trie implements Serializable{
 //    System.out.println("possiblePositions before continue: ");
 //    node.possiblePosition.stream().forEach(System.out::println);
 //    System.out.println("continue: "+currChar+", result: "+result.toString());
-    dfsGen(original,alternativeChars,curr+1,distance,result,canSet,next, lm, prevString);
+    dfsGen(original,alternativeChars,curr+1,distance,result,canSet,termToEdit,next, lm, prevString);
     result.setLength(startingLen);
   }
 
   private void suffixDFS(TrieNode node, int distance, PriorityQueue<Pair<String, Double>> canSet,
-      StringBuilder result, String prevString, LanguageModel lm) {
+      StringBuilder result, String prevString, LanguageModel lm, Map<String,Integer> map, int remainingBalance) {
     if (distance == 0 && node.wordCount > 0){
 //      System.out.println("Adding: "+result.toString());
-      updateCandidateSet(result,prevString, lm, canSet);
+      updateCandidateSet(result,prevString, lm, canSet,map,remainingBalance);
     }else{
       for ( Character c: node.children.keySet()){
         int len = result.length();
         result.append(c);
-        suffixDFS(node.children.get(c),distance-1,canSet,result,prevString,lm);
+        suffixDFS(node.children.get(c),distance-1,canSet,result,prevString,lm,map,remainingBalance);
         result.setLength(len);
       }
     }
