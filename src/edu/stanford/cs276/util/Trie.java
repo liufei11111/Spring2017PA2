@@ -218,8 +218,6 @@ public  class Trie implements Serializable{
     // we can truncate when we are so long in expected length that deletion makes no sense
 //    System.out.println("remainingLen: "+remainingLen+", startingLen: "+startingLen +", originalLen: "+originalLen+", distance: "+distance);
     if ((remainingLen+startingLen) - originalLen < distance){
-      keySet.add(' ');
-      keySet.add('-');
       for (Character c : keySet){
         if (c != ' '){
           next = node.children.get(c);
@@ -242,8 +240,6 @@ public  class Trie implements Serializable{
 
 
       }
-      keySet.remove(' ');
-      keySet.remove('-');
     }
 
 //    // substitue

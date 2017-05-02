@@ -113,6 +113,7 @@ public class Dictionary implements Serializable{
               ,0,Config.correctionDistance,new StringBuilder(),topSelector,termToEdit,map.root,lm, i==0?null:terms[i-1]);
           for (Pair<String,Double> pair: topSelector){
             canSetPerTerm.add(new Pair<>(pair.getFirst(),termToEdit.get(pair.getFirst())));
+            System.err.println(pair);
           }
       }else{
         canSetPerTerm.add(new Pair<>(terms[i],0));
