@@ -86,6 +86,7 @@ public class Dictionary implements Serializable{
             wrongWords.poll();
             // unigram is tie breaker for two terms
             wrongWords.add(new Pair<>(i+1,scoreBigram));
+            wrongWords.add(new Pair<>(i,scoreBigram));
           }
         }
       }
