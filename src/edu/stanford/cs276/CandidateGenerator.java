@@ -3,7 +3,8 @@ package edu.stanford.cs276;
 import edu.stanford.cs276.util.Dictionary;
 import edu.stanford.cs276.util.Pair;
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class CandidateGenerator implements Serializable {
@@ -35,9 +36,42 @@ public class CandidateGenerator implements Serializable {
       '8', '9', ' ', ',' };
 
   // Generate all candidates for the target query
-  public Set<Pair<String,Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm) throws Exception {
-    return dic.generateKoffCandidates(query,Config.distance,lm);
+  public Map<String, Pair<Double, Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm) throws Exception {
+    return dic.generateKoffCandidates(query,Config.distance,lm,this);
   }
 
+
+  public Pair<String,Double> getCorrectedQuery(String original, Map<String,Pair<Double,Integer>> queries,NoisyChannelModel ncm, LanguageModel lm) {
+    Pair<String, Double> thePair = null;
+    for (Entry<String,Pair<Double, Integer>> query: queries.entrySet()){
+      // everything is already log transformed
+      double noisyScore = ncm.getEditCostModel().editProbability(original,query.getKey(),query.getValue().getSecond());
+      double languageScore = query.getValue().getFirst();
+      double candScore = noisyScore+Config.languageModelScalingFactor * languageScore;
+      if (thePair == null){
+        thePair = new Pair<>(query.getKey(),candScore);
+      }else if (thePair.getSecond()<candScore){
+        thePair = new Pair<>(query.getKey(),candScore);
+      }
+    }
+    if (thePair == null){
+      throw new RuntimeException("Forbidden query cands without a single result!");
+    }
+    return thePair;
+  }
+
+  public  double jointProbScore(String query, LanguageModel lm) {
+    String[] terms = query.split(" ");
+    double logLanguageScore = 0.0; // log 1
+    for(int i=0;i<terms.length-1;++i){
+      if (i==0) {
+        // raw count is good as the total count is a constant
+        logLanguageScore += Math.log(lm.rawCountForTerm(terms[i]));
+      }
+      logLanguageScore+=Math.log(lm.rawBiCountForTerms(terms[i],terms[i+1]));
+
+    }
+    return logLanguageScore;
+  }
 
 }

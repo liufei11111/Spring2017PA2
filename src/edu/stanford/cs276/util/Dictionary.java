@@ -4,21 +4,15 @@ package edu.stanford.cs276.util;
 import edu.stanford.cs276.CandidateGenerator;
 import edu.stanford.cs276.Config;
 import edu.stanford.cs276.LanguageModel;
-import edu.stanford.cs276.NoisyChannelModel;
-import java.io.RandomAccessFile;
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
-import java.io.RandomAccessFile;
 
 public class Dictionary implements Serializable{
   // TODO: This can be replaced with Trie
@@ -26,12 +20,6 @@ public class Dictionary implements Serializable{
   private Trie map;
 
 
-  public static Dictionary deserialize(byte[] b){
-    return new Dictionary(Trie.deserialize(b,0,b.length));
-  }
-  public byte[] serialize(){
-    return map.serialize();
-  }
   public Dictionary() {
 //    termCount = 0;
     map = new Trie();
@@ -40,195 +28,183 @@ public class Dictionary implements Serializable{
 //    termCount = 0;
     this.map = map;
   }
-  public void add(String term) {
-//    termCount++;
-    List<String> list = new LinkedList<>();
-    list.add(term);
-    map.insert(list);
+  public void add(String term,int count) {
+    map.insert(term,count);
   }
-  public void addKGram(String[] terms, int startI, int endI,int count) {
-//    termCount++;
-    List<String> list = Arrays.asList(terms);
-    map.insert(list.subList(startI,endI),0,count);
-  }
-//  public int count(String term) {
-//    return map.searchWordNodePos(term).wordCount;
-//  }
 
-  public Set<Pair<String,Integer>> generateKoffCandidates(String query, int distance, LanguageModel lm){
-    Set<Pair<String,Integer>> candidateSet = new HashSet<>();
-    candidateSet.add(new Pair<String, Integer>(query,0));
+
+  public Map<String,Pair<Double,Integer>> generateKoffCandidates(String query, int distance,
+      LanguageModel lm, CandidateGenerator candidateGenerator){
+   Map<String,Pair<Double,Integer>> candidateSet = new HashMap<>();
+    candidateSet.put(query,new Pair<>(Config.logNoOpProb,0));
     String[] terms = query.split(" ");
-    allocateEditDistancesAmongTerms(terms, distance,candidateSet, lm);
+    allocateEditDistancesAmongTerms(terms, distance,candidateSet, lm, candidateGenerator);
     return candidateSet;
   }
-  private void addWrongTerms(String[] terms, Set<Pair<Integer,Double>> wrongWords,int distance){
-    for (int i=0;i<terms.length&&wrongWords.size()<=distance;++i){
-      double score = map.unigramProbForTerm(terms[i]);
+  private boolean addWrongTerms(String[] terms, PriorityQueue<Pair<Integer,Double>> wrongWords,int distance, LanguageModel lm){
+    int count = 0;
+    for (int i=0;i<terms.length;++i){
+      double score = lm.unigramProbForTerm(terms[i]);
       if (score == 0.0){
-        wrongWords.add(new Pair<>(i,score));
+        count++;
+        if (count <distance){
+          wrongWords.add(new Pair<>(i,score));
+        }
       }
+    }
+    if (count > distance){
+      // a query full of junk. We give up and let it go
+      wrongWords.clear();
+      return false;
+    }else{
+      return true;
     }
   }
 
-  private void allocateEditDistancesAmongTerms(String[] terms,  int distance, Set<Pair<String,Integer>> candidateSet,LanguageModel lm){
+  private void allocateEditDistancesAmongTerms(String[] terms, int distance,
+      Map<String, Pair<Double, Integer>> candidateSet, LanguageModel lm,
+      CandidateGenerator candidateGenerator){
     // from wrong words to score
-    Set<Pair<Integer,Double>> wrongWords = new HashSet<>();
-    addWrongTerms(terms,wrongWords,distance);
-    int selectedIndex = -1;
-    double currentLowProd = 1;
+//    Set<Pair<Integer,Double>> wrongWords = new HashSet<>();
+    PriorityQueue<Pair<Integer,Double>> wrongWords = new PriorityQueue<Pair<Integer,Double>>(distance, new IntegerDoublePairDecendingComparator());
+    if (!addWrongTerms(terms,wrongWords,distance,lm)){
+      return;
+    }
     if (wrongWords.size()<distance){
-      for(int i=0;i<terms.length-1&&wrongWords.size()<=Config.distance;++i){
+      for(int i=0;i<terms.length-1;++i){
         if (wrongWords.contains(i)||wrongWords.contains(i+1)){
           continue;
         }
-        // we use bigram to decide which word is wrong. We don't need K gram for this. Rather, we use
-        // K gram for deciding which candidate is the best corrected one.
-        double scoreBigram = map.getBigramProbFor(terms,i,lm)*map.unigramProbForTerm(terms[i]);
-        if (scoreBigram<currentLowProd){
-          selectedIndex = i;
-          currentLowProd = scoreBigram;
+
+
+        // we use bigram to decide which word is wrong. and we just need to log of count and total is constant and can be ignored
+        double scoreBigram = lm.getBigramProbFor(terms[i],terms[i+1]);
+        if (wrongWords.size()<distance){
+          wrongWords.add(new Pair<>(i,scoreBigram));
+        }else{
+          if (scoreBigram<wrongWords.peek().getSecond()){
+            wrongWords.poll();
+            // unigram is tie breaker for two terms
+            wrongWords.add(new Pair<>(i+1,scoreBigram));
+          }
         }
-      }
-      if (selectedIndex >= 0){
-        wrongWords.add(new Pair<>(selectedIndex,currentLowProd));
-//        wrongWords.add(new Pair<>(selectedIndex+1,currentLowProd));
       }
     }
     //wrong words are term level and candidate sets are query level
-    populateCandset(terms,wrongWords,candidateSet);
+    populateCandset(terms,wrongWords,candidateSet,lm,candidateGenerator);
   }
-  private void trimCanSetWithBigram(Set<String> canSetPerTerm,String[] terms,int i, int j){
-    // TODO: imporve Trimming
-    Set<String> reservedSet = new HashSet<>();
-    if (canSetPerTerm.size()>Config.candidateSetSize){
-      int k=0;
-      for (String str: canSetPerTerm){
-        if (k<Config.candidateSetSize){
-          reservedSet.add(str);
-          k++;
-        }else {
-          break;
-        }
-      }
-      canSetPerTerm.retainAll(reservedSet);
-    }
-  }
-  private void populateCandset(String[] terms, Set<Pair<Integer, Double>> wrongWords,
-      Set<Pair<String, Integer>> candidateSet) {
-    List<List<Pair<String,Integer>>> eachTermSet = new ArrayList<>();
-    Map<String, Integer> termToEditDistance = new HashMap<>();
+
+  private void populateCandset(String[] terms, PriorityQueue<Pair<Integer, Double>> wrongWords,
+      Map<String, Pair<Double,Integer>> candidateSet, LanguageModel lm,
+      CandidateGenerator candidateGenerator) {
+    List<List<Pair<String,Integer>>> listOfCandLists = new ArrayList<>();
     Set<Integer> markedWords = new HashSet<>();
     for (Pair<Integer,Double> cand : wrongWords){
       markedWords.add(cand.getFirst());
     }
     for (int i=0;i<terms.length;++i){
-      Set<String> canSetPerTerm = new HashSet<>();
+      // from candidate word to edit distance
+      Set<Pair<String,Integer>> canSetPerTerm = new HashSet<>();
       if (markedWords.contains(i)){
-        for (int j=1;j<=Config.correctionDistance;++j){
+          PriorityQueue<Pair<String,Double>> topSelector = new PriorityQueue<>(Config.candidateSetSize);
           map.dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
-              ,0,i,new StringBuilder(),canSetPerTerm,map.root);
-          trimCanSetWithBigram(canSetPerTerm,terms,i,j);
-          for (String str : canSetPerTerm){
-            if (!termToEditDistance.containsKey(str)){
-              termToEditDistance.put(str,j);
-            }
-          }
+              ,0,Config.correctionDistance,new StringBuilder(),topSelector,map.root,lm, i==0?null:terms[i-1]);
+//          trimCanSetWithBigram(canSetPerTerm,terms,i,lm);
 
-        }
       }else{
-        canSetPerTerm.add(terms[i]);
-        if (!termToEditDistance.containsKey(terms[i])){
-          termToEditDistance.put(terms[i],0);
-        }
+        canSetPerTerm.add(new Pair<>(terms[i],0));
       }
       List<Pair<String,Integer>> eachList = new ArrayList<>();
-      for (String term : canSetPerTerm){
-        eachList.add(new Pair<>(term, termToEditDistance.get(term)));
+      for (Pair<String,Integer> term : canSetPerTerm){
+        eachList.add(term);
       }
-      eachTermSet.add(eachList);
+      listOfCandLists.add(eachList);
     }
     StringBuilder sb = new StringBuilder();
-    dfsWithCanset( eachTermSet, sb, 0,  0, candidateSet);
 
+//    for (List<Pair<String,Integer>> eachList: listOfCandLists){
+//      for ()
+//    }
+//  }
+    PriorityQueue<Pair<String,Double>> pq = new PriorityQueue<>(Config.candidateSetSize, new StringDoublePairAscendingComparator());
+    Map<String, Integer> mapToEditDistance = new HashMap<>();
+    dfsWithCanset( listOfCandLists, sb, 0,  0, pq,mapToEditDistance, candidateGenerator,lm);
+    for (Pair<String,Double> oneCan: pq){
+      candidateSet.put(oneCan.getFirst(),new Pair<>(oneCan.getSecond(),mapToEditDistance.get(oneCan.getFirst())));
+    }
   }
 
-  private void dfsWithCanset(List<List<Pair<String,Integer>>> eachTermSet,StringBuilder sb, int setIndex, int cumEditDiff, Set<Pair<String, Integer>> candidateSet){
-    if (setIndex==eachTermSet.size()){
-      candidateSet.add(new Pair<>(sb.toString(),cumEditDiff));
-    }else{
+  private void dfsWithCanset(List<List<Pair<String,Integer>>> eachTermSet,StringBuilder sb,
+      int setIndex, int cumEditDiff,PriorityQueue<Pair<String,Double>> pq
+      ,  Map<String, Integer> mapToEditDistance, CandidateGenerator generator, LanguageModel lm) {
 
-      List<Pair<String,Integer>> list = eachTermSet.get(setIndex);
-      for (Pair<String,Integer> term : list){
+    if (setIndex == eachTermSet.size()) {
+      String newCan = sb.toString();
+      if (!mapToEditDistance.containsKey(newCan)){
+        if (pq.size()<Config.candidateSetSize ){
+          pq.add(new Pair<>(newCan, generator.jointProbScore(newCan,lm)));
+
+        }else{
+          double newCandScore = generator.jointProbScore(newCan,lm);
+          if (pq.peek().getSecond()<newCandScore ){
+            pq.poll();
+            pq.add(new Pair<>(sb.toString(),newCandScore));
+          }
+        }
+        mapToEditDistance.put(newCan,cumEditDiff);
+      }else if (mapToEditDistance.get(newCan)>cumEditDiff){
+        mapToEditDistance.put(newCan,cumEditDiff);
+      }
+
+
+    } else {
+
+      List<Pair<String, Integer>> list = eachTermSet.get(setIndex);
+      for (Pair<String, Integer> term : list) {
         int restoreLen = sb.length();
-        if (sb.length()>0){
+        if (sb.length() > 0) {
           sb.append(" ");
         }
         sb.append(term.getFirst());
-        dfsWithCanset(eachTermSet,sb,setIndex+1,cumEditDiff+term.getSecond(),candidateSet);
+        dfsWithCanset(eachTermSet, sb, setIndex + 1, cumEditDiff + term.getSecond(), pq,mapToEditDistance,generator,lm);
         sb.setLength(restoreLen);
       }
     }
   }
-  public String getCorrectedQuery(String original, Set<Pair<String,Integer>> queries,NoisyChannelModel ncm, LanguageModel lm) {
-    Double probLowThreshold = Double.MIN_VALUE;
-    Pair<String, Double> thePair = null;
-    for (Pair<String, Integer> query: queries){
-      if (thePair == null){
-        thePair = new Pair<>(query.getFirst(),probLowThreshold);
-        continue;
-      }
-      dfsWithTruncation(original, query, thePair, ncm, lm);
-    }
-    if (thePair == null){
-      throw new RuntimeException("Forbidden query cands without a single result!");
-    }
-    return thePair.getFirst();
-  }
-  public void dfsWithTruncation(String orignal, Pair<String,Integer> query, Pair<String, Double> thePair,NoisyChannelModel ncm, LanguageModel lm){
-    String canQuery = query.getFirst();
-    int editDiff = query.getSecond();
-    double runningMax = thePair.getSecond();
-    // to avoid the exception with an eps
-    double noiseChannel = Math.log(ncm.getEditCostModel().editProbability(orignal,canQuery,editDiff)+Config.eps);
-    if (runningMax>noiseChannel){
-      return;
-    }
-    double bayesEstimateLog = noiseChannel;
-    String[] terms = canQuery.split(" ");
-    biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
-  }
-  private void biGramJointProbForTerms(String[] terms, int i, Trie map, Pair<String, Double> thePair, Pair<String,Integer> query, double bayesEstimateLog, LanguageModel lm){
-    if (bayesEstimateLog <= thePair.getSecond()){
-      return;
-    }
-    if (i==0){
-      bayesEstimateLog += Math.log(map.unigramProbForTerm(terms[i])+Config.eps);
-      biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
-    }else if (i==terms.length-2){
-      bayesEstimateLog += Math.log(map.getBigramProbFor(terms,i,lm)+Config.eps);
-      if (bayesEstimateLog> thePair.getSecond()){
-        thePair.setFirst(query.getFirst());
-        thePair.setSecond(bayesEstimateLog);
-      }
-    }else if (i>terms.length-1){
-      return;
-    }else{
-      bayesEstimateLog += Math.log(map.getBigramProbFor(terms,i,lm)+Config.eps);
-      biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
-
-    }
-
-  }
-
-//  public String  getCorrectedQuery(String query){
-//    for
-//    Set<String> candidateSet = new HashSet<>();
-//    for (int i=1;i<distance;++i){
-//      map.dfsGen(term.toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet)),
-//          0,i,new StringBuilder(),candidateSet,map.root,0);
+//  public void dfsWithTruncation(String orignal, Pair<String,Integer> query, Pair<String, Double> thePair,NoisyChannelModel ncm, LanguageModel lm){
+//    String canQuery = query.getFirst();
+//    int editDiff = query.getSecond();
+//    double runningMax = thePair.getSecond();
+//    // to avoid the exception with an eps
+//    double noiseChannel = Math.log(ncm.getEditCostModel().editProbability(orignal,canQuery,editDiff)+Config.eps);
+//    if (runningMax>noiseChannel){
+//      return;
 //    }
-//    candidateSet.add(term);
-//    return candidateSet;
+//    double bayesEstimateLog = noiseChannel;
+//    String[] terms = canQuery.split(" ");
+//    biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
 //  }
+//  private void biGramJointProbForTerms(String[] terms, int i, Trie map, Pair<String, Double> thePair, Pair<String,Integer> query, double bayesEstimateLog, LanguageModel lm){
+//    if (bayesEstimateLog <= thePair.getSecond()){
+//      return;
+//    }
+//    if (i==0){
+//      bayesEstimateLog += Math.log(lm.unigramProbForTerm(terms[i])+Config.eps);
+//      biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
+//    }else if (i==terms.length-2){
+//      bayesEstimateLog += Math.log(lm.getBigramProbFor(terms,i,lm)+Config.eps);
+//      if (bayesEstimateLog> thePair.getSecond()){
+//        thePair.setFirst(query.getFirst());
+//        thePair.setSecond(bayesEstimateLog);
+//      }
+//    }else if (i>terms.length-1){
+//      return;
+//    }else{
+//      bayesEstimateLog += Math.log(lm.getBigramProbFor(terms,i,lm)+Config.eps);
+//      biGramJointProbForTerms(terms,0,map,thePair,query,bayesEstimateLog,lm);
+//
+//    }
+//
+//  }
+
 }

@@ -29,6 +29,7 @@ public class LanguageModel implements Serializable {
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
   HashMap<String,Integer> map = new HashMap<>();
+  Long uniqWordCount = 0L;
   public HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
   Dictionary kGramTrieDict = null;
 //  byte[] kGramStorageState = null;
@@ -79,9 +80,6 @@ public class LanguageModel implements Serializable {
          */
         String[] tokens = line.split(" ");
         for (int i=0;i<tokens.length;++i){
-//            System.out.println("Line: "+line);
-//            System.out.println("Tokens: "+Arrays.toString(tokens));
-//            kGramTrieDict.addKGram(tokens,i,i+Config.kOfGrams);
           if (i!=tokens.length-1){
             Pair<String,String> bigramPair = new Pair<>(tokens[i],tokens[i+1]);
             if (bigram.containsKey(bigramPair)){
@@ -92,20 +90,14 @@ public class LanguageModel implements Serializable {
           }
           if (map.containsKey(tokens[i])){
             map.put(tokens[i],map.get(tokens[i])+1);
+
           }else{
             map.put(tokens[i],1);
           }
-//          kGramTrieDict.add(tokens[i]);
-
+          uniqWordCount++;
         }
 
       }
-//      for (Entry<String,Integer> entry: map.entrySet()){
-//        String[] strs = new String[1];
-//        strs[0]=entry.getKey();
-//        kGramTrieDict.addKGram(strs,0,1,entry.getValue());
-//      }
-//      map.clear();
       input.close();
     }
     System.out.println("Done.");
@@ -126,34 +118,15 @@ public class LanguageModel implements Serializable {
    * Loads the language model object (and all associated data) from disk
    */
   public static LanguageModel load() throws Exception {
-//    try {
-//      if (lm_ == null) {
-//        RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "r");
-//        byte[] b = new byte[(int)f.length()];
-//        f.readFully(b);
-//        lm_ = LanguageModel.deserialize(b);
-//        f.close();
-//      }
-//    } catch (Exception e) {
-//      throw e;
-////      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
-//    }
-//    return lm_;
     try {
       if (lm_ == null) {
         FileInputStream fiA = new FileInputStream(Config.languageModelFile);
         ObjectInputStream oisA = new ObjectInputStream(fiA);
         lm_ = (LanguageModel) oisA.readObject();
         for (Entry<String,Integer> entry : lm_.map.entrySet()){
-          String[] strs = new String[1];
-          strs[0]=entry.getKey();
-          lm_.kGramTrieDict.addKGram(strs,0,1,entry.getValue());
+          lm_.kGramTrieDict.add(entry.getKey(),entry.getValue());
 
         }
-//        lm_.map.clear();
-//        lm_.kGramStorageState = lm_.serialize();
-//        lm_.kGramStorageState = null;
-//        lm_.kGramTrieDict = LanguageModel.deserialize(lm_.kGramStorageState );
       }
     } catch (Exception e) {
       throw e;
@@ -162,15 +135,6 @@ public class LanguageModel implements Serializable {
     return lm_;
   }
 
-//  private  static Dictionary deserialize(byte[] b) {
-//    Dictionary dic = Dictionary.deserialize(b);
-////    LanguageModel lmNew = new LanguageModel(dic);
-////    System.out.println(lmNew.kGramTrieDict);
-//    return dic;
-//  }
-//  private  byte[] serialize() {
-//    return kGramTrieDict.serialize();
-//  }
   /**
    * Saves the object (and all associated data) to disk
    */
@@ -180,9 +144,35 @@ public class LanguageModel implements Serializable {
 //    f.close();
     FileOutputStream saveFile = new FileOutputStream(Config.languageModelFile);
     ObjectOutputStream save = new ObjectOutputStream(saveFile);
-//    this.kGramStorageState = this.serialize();
-//    this.kGramTrieDict = null;
     save.writeObject(this);
     save.close();
   }
+  public int rawCountForTerm(String term){
+    Integer count = map.get(term);
+    return count == null? 0:count;
+  }
+  public int rawBiCountForTerms(String term1, String term2){
+    Integer count = bigram.get(new Pair<>(term1,term2));
+    return count == null? 0:count*1;
+  }
+  public double unigramProbForTerm(String term) {
+    Integer count = map.get(term);
+    if (count == null){
+      return 0.0;
+    }else{
+      return Math.log(count);
+    }
+//    return 0.5;
+  }
+
+  public double getBigramProbFor(String term1, String term2) {
+    if (term1 == null){
+      return unigramProbForTerm(term2);
+    }
+    double term2Unigram = rawCountForTerm(term2);
+    // we use bigram to decide which word is wrong. and we just need to log of count and total is constant and can be ignored
+    return  Math.log(term2Unigram)*Config.smoothingFactor+Math.log(rawBiCountForTerms(term1,term2))*(1-Config.smoothingFactor);
+  }
+
+
 }

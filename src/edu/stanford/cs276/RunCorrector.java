@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -74,9 +75,9 @@ public class RunCorrector {
      */
     FileWriter fw = new FileWriter(new File("/tmp/pa2-diff.txt"));
     while ((query = queriesFileReader.readLine()) != null) {
-      Set<Pair<String,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict,languageModel);
-      String correctedQuery =  languageModel.kGramTrieDict.getCorrectedQuery(query,queries,nsm,languageModel);
-      queries.clear();
+      Map<String,Pair<Double,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict,languageModel);
+      Pair<String,Double> correctedQuery =  canGen.getCorrectedQuery(query,queries,nsm,languageModel);
+      queries.clear();// force GC
       /*
        * Your code here: currently the correctQuery and original query are the same
        * Complete this implementation so that the spell corrector corrects the 
