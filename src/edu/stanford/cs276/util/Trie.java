@@ -22,16 +22,17 @@ class TrieNode implements Serializable{
   // Initialize your data structure here.
 //  char c;
 
-  public Trie next;
+//  public Trie next;
   Map<Character, TrieNode> children = new TreeMap<Character, TrieNode>();// don't need that much space
   int wordCount;
 //  Set<Integer> possiblePosition= new HashSet<Integer>();
   public TrieNode(){
-    next = null;
+
+//    next = null;
   }
 
   public TrieNode(Trie next,HashMap<Character, TrieNode> children, int wordCount){
-    this.next = next;
+//    this.next = next;
     this.children = children;
     this.wordCount = wordCount;
   }
@@ -46,7 +47,9 @@ class TrieNode implements Serializable{
       childrenStr.append("{"+entry.getKey().toString()+"\n, "+entry.getValue().toString()+"}");
     }
 //    children.entrySet().stream().forEach((x)->{ childrenStr.append("{"+x.getKey().toString()+"\n, "+x.getValue().toString()+"}");});
-    return "\n{wordcount="+this.wordCount+", children: "+childrenStr+(next==null?null:", Trie: "+next.toString())+"}\n";
+//    return "\n{wordcount="+this.wordCount+", children: "+childrenStr+(next==null?null:", Trie: "+next.toString())+"}\n";
+    return "\n{wordcount="+this.wordCount+", children: "+childrenStr+"}\n";
+
   }
 
   public byte[] serialize() {
@@ -60,11 +63,11 @@ class TrieNode implements Serializable{
     }
     int sizeOfTrie = 0;
 
-    if (this.next != null){
-      byte[] trieBytes = this.next.serialize();
-      sizeOfTrie+=trieBytes.length;
-      listAssetBytes.add(trieBytes);
-    }
+//    if (this.next != null){
+//      byte[] trieBytes = this.next.serialize();
+//      sizeOfTrie+=trieBytes.length;
+//      listAssetBytes.add(trieBytes);
+//    }
     int totalSize = 4*4 + childrenByteSize + sizeOfTrie; // char is of size 2 in java
     ByteBuffer bb = ByteBuffer.allocate(totalSize);
 
@@ -268,14 +271,14 @@ public class Trie implements Serializable{
       if(i == wordArray.length - 1){
         cur.incrementWordCount(count);
         this.increaseTrieCount(count);
-        if (index<words.size()-1){
-          if (cur.next == null){
-            cur.next = new Trie();
-            cur.next.insert(words,index+1);
-          }else{
-            cur.next.insert(words, index+1);
-          }
-        }
+//        if (index<words.size()-1){
+//          if (cur.next == null){
+//            cur.next = new Trie();
+//            cur.next.insert(words,index+1);
+//          }else{
+//            cur.next.insert(words, index+1);
+//          }
+//        }
 
       }
     }
@@ -368,27 +371,27 @@ public class Trie implements Serializable{
     }
     return cur;
   }
-  public TrieNode searchWordNodePos(String[] strs, int startI, int endI, Trie map){
-    if (startI >= endI||map==null){return null;}
-    Map<Character, TrieNode> children = map.root.children;
-    TrieNode cur = null;
-    char[] sArray = strs[startI].toCharArray();
-    for(int i = 0; i < sArray.length; i++){
-      char c = sArray[i];
-      if(children.containsKey(c)){
-        cur = children.get(c);
-        children = cur.children;
-      } else{
-        return null;
-      }
-    }
-    if (startI<endI-1){
-      return searchWordNodePos(strs,startI+1,endI,cur.next);
-    }else{
-      return cur;
-    }
-
-  }
+//  public TrieNode searchWordNodePos(String[] strs, int startI, int endI, Trie map){
+//    if (startI >= endI||map==null){return null;}
+//    Map<Character, TrieNode> children = map.root.children;
+//    TrieNode cur = null;
+//    char[] sArray = strs[startI].toCharArray();
+//    for(int i = 0; i < sArray.length; i++){
+//      char c = sArray[i];
+//      if(children.containsKey(c)){
+//        cur = children.get(c);
+//        children = cur.children;
+//      } else{
+//        return null;
+//      }
+//    }
+//    if (startI<endI-1){
+//      return searchWordNodePos(strs,startI+1,endI,cur.next);
+//    }else{
+//      return cur;
+//    }
+//
+//  }
   public Double unigramProbForTerm(String word){
     TrieNode node = searchWordNodePos(word);
     if (node == null){
@@ -486,11 +489,11 @@ public class Trie implements Serializable{
           result.setLength(startingLen);
         }else{
 //          System.out.println("Interstion space begin:");
-          if (node != null && node.wordCount>0 && curr!=0 && curr != originalLen&& node.next!=null){
+          if (node != null && node.wordCount>0 && curr!=0 && curr != originalLen){
 
             result.append(c);
 //            System.out.println("insertion: <space>, result: "+result.toString());
-            dfsGen(original,alternativeChars,curr,distance-1,result,canSet,node.next.root);
+            dfsGen(original,alternativeChars,curr,distance-1,result,canSet,root);
             result.setLength(startingLen);
           }
 //          System.out.println("Interstion space complete!");
@@ -554,9 +557,10 @@ public class Trie implements Serializable{
       canSet.add(result.toString());
     }else{
       for ( Character c: node.children.keySet()){
+        int len = result.length();
         result.append(c);
         suffixDFS(node.children.get(c),distance-1,canSet,result);
-        result.deleteCharAt(result.length()-1);
+        result.setLength(len);
       }
     }
   }

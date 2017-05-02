@@ -29,8 +29,8 @@ public class LanguageModel implements Serializable {
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
   HashMap<String,Integer> map = new HashMap<>();
-  public HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
-  Dictionary kGramTrieDict = null;
+  public static HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
+  public static Dictionary kGramTrieDict = null;
 //  byte[] kGramStorageState = null;
 
   /*
@@ -126,31 +126,26 @@ public class LanguageModel implements Serializable {
    * Loads the language model object (and all associated data) from disk
    */
   public static LanguageModel load() throws Exception {
-//    try {
-//      if (lm_ == null) {
-//        RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "r");
-//        byte[] b = new byte[(int)f.length()];
-//        f.readFully(b);
-//        lm_ = LanguageModel.deserialize(b);
-//        f.close();
-//      }
-//    } catch (Exception e) {
-//      throw e;
-////      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
-//    }
+    try {
+      if (kGramTrieDict == null) {
+        RandomAccessFile f = new RandomAccessFile(Config.trieFile, "r");
+        byte[] b = new byte[(int)f.length()];
+        f.readFully(b);
+        kGramTrieDict = Dictionary.deserialize(b);
+        f.close();
+      }
+    } catch (Exception e) {
+      throw e;
+//      throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");
+    }
 //    return lm_;
     try {
       if (lm_ == null) {
         FileInputStream fiA = new FileInputStream(Config.languageModelFile);
         ObjectInputStream oisA = new ObjectInputStream(fiA);
         lm_ = (LanguageModel) oisA.readObject();
-        for (Entry<String,Integer> entry : lm_.map.entrySet()){
-          String[] strs = new String[1];
-          strs[0]=entry.getKey();
-          lm_.kGramTrieDict.addKGram(strs,0,1,entry.getValue());
 
-        }
-        lm_.map.clear();
+//        lm_.map.clear();
 //        lm_.kGramStorageState = lm_.serialize();
 //        lm_.kGramStorageState = null;
 //        lm_.kGramTrieDict = LanguageModel.deserialize(lm_.kGramStorageState );
@@ -175,9 +170,16 @@ public class LanguageModel implements Serializable {
    * Saves the object (and all associated data) to disk
    */
   public void save() throws Exception {
-//    RandomAccessFile f = new RandomAccessFile(Config.languageModelFile, "rw");
-//    f.write(this.serialize());
-//    f.close();
+    for (Entry<String,Integer> entry : lm_.map.entrySet()){
+      String[] strs = new String[1];
+      strs[0]=entry.getKey();
+      kGramTrieDict.addKGram(strs,0,1,entry.getValue());
+
+    }
+    RandomAccessFile f = new RandomAccessFile(Config.trieFile, "rw");
+    f.write(this.kGramTrieDict.serialize());
+    f.close();
+    this.kGramTrieDict = null;
     FileOutputStream saveFile = new FileOutputStream(Config.languageModelFile);
     ObjectOutputStream save = new ObjectOutputStream(saveFile);
 //    this.kGramStorageState = this.serialize();

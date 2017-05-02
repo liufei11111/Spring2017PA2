@@ -161,7 +161,10 @@ public class Dictionary implements Serializable{
       List<Pair<String,Integer>> list = eachTermSet.get(setIndex);
       for (Pair<String,Integer> term : list){
         int restoreLen = sb.length();
-        sb.append(" "+term.getFirst());
+        if (sb.length()>0){
+          sb.append(" ");
+        }
+        sb.append(term.getFirst());
         dfsWithCanset(eachTermSet,sb,setIndex+1,cumEditDiff+term.getSecond(),candidateSet);
         sb.setLength(restoreLen);
       }

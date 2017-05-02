@@ -3,6 +3,7 @@ package edu.stanford.cs276;
 public class Config {
   public static final String noisyChannelFile = "noisyChannel";
   public static final String languageModelFile = "languageModel";
+  public static final String trieFile = "trieFile";
   public static final String candidateGenFile = "candidateGenerator";
   public static final int distance = 2; // number of edit's allowed in query
   public static final int correctionDistance = 1; // for a term, edit distance
