@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class RunCorrector {
     FileWriter fw3 = new FileWriter(new File("./pa2-space-diff.txt"));
     while ((query = queriesFileReader.readLine()) != null) {
       Map<String,Pair<Double,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict,languageModel);
-      Pair<String,Double> correctedQuery =  canGen.getCorrectedQuery(query,queries,nsm,languageModel);
+      Pair<String,double[]> correctedQuery =  canGen.getCorrectedQuery(query,queries,nsm,languageModel);
       queries.clear();// force GC
       /*
        * Your code here: currently the correctQuery and original query are the same
@@ -109,7 +110,8 @@ public class RunCorrector {
          * help you improve your candidate generation/scoring steps 
          */
         if (!goldQuery.equals(correctedQuery.getFirst())){
-          fw.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
+          double[] scores = correctedQuery.getSecond();
+          fw.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+" Scores: "+ Arrays.toString(scores)+"\n");
           String[] goldterms = goldQuery.split(" ");
           String[] myterms = correctedQuery.getFirst().split(" ");
           if (goldterms.length != myterms.length) {
@@ -127,7 +129,7 @@ public class RunCorrector {
             for (Pair<String,String> pair:listDiff){
               sb.append(pair+" ");
             }
-            fw2.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n"+sb.toString()+"\n");
+            fw2.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"________"+sb.toString()+"\n");
           }
         }
       }

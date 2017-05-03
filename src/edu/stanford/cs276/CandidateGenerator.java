@@ -41,17 +41,30 @@ public class CandidateGenerator implements Serializable {
   }
 
 
-  public Pair<String,Double> getCorrectedQuery(String original, Map<String,Pair<Double,Integer>> queries,NoisyChannelModel ncm, LanguageModel lm) {
-    Pair<String, Double> thePair = null;
+  public Pair<String,double[]> getCorrectedQuery(String original, Map<String,Pair<Double,Integer>> queries,NoisyChannelModel ncm, LanguageModel lm) {
+    Pair<String, double[]> thePair = null;
     for (Entry<String,Pair<Double, Integer>> query: queries.entrySet()){
       // everything is already log transformed
+//      double noisyScore = ncm.getEditCostModel().editProbability(original,query.getKey(),query.getValue().getSecond());
+//      double languageScore = query.getValue().getFirst();
+//      double candScore = noisyScore+Config.languageModelScalingFactor * languageScore;
+//
+//      if (thePair == null){
+//        thePair = new Pair<>(query.getKey(),candScore);
+//      }else if (thePair.getSecond()<candScore){
+//        thePair = new Pair<>(query.getKey(),candScore);
+//      }
       double noisyScore = ncm.getEditCostModel().editProbability(original,query.getKey(),query.getValue().getSecond());
       double languageScore = query.getValue().getFirst();
       double candScore = noisyScore+Config.languageModelScalingFactor * languageScore;
+      double[] scores = new double[3];
+      scores[0]=noisyScore;
+      scores[1]=languageScore;
+      scores[2]=candScore;
       if (thePair == null){
-        thePair = new Pair<>(query.getKey(),candScore);
-      }else if (thePair.getSecond()<candScore){
-        thePair = new Pair<>(query.getKey(),candScore);
+        thePair = new Pair<>(query.getKey(),scores);
+      }else if (thePair.getSecond()[2]<candScore){
+        thePair = new Pair<>(query.getKey(),scores);
       }
     }
     if (thePair == null){
