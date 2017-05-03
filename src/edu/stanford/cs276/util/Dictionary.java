@@ -4,6 +4,7 @@ package edu.stanford.cs276.util;
 import edu.stanford.cs276.CandidateGenerator;
 import edu.stanford.cs276.Config;
 import edu.stanford.cs276.LanguageModel;
+import edu.stanford.cs276.NoisyChannelModel;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,11 +35,11 @@ public class Dictionary implements Serializable{
 
 
   public Map<String,Pair<Double,Integer>> generateKoffCandidates(String query, int distance,
-      LanguageModel lm, CandidateGenerator candidateGenerator){
+      LanguageModel lm, CandidateGenerator candidateGenerator, NoisyChannelModel ncm){
    Map<String,Pair<Double,Integer>> candidateSet = new HashMap<>();
     candidateSet.put(query,new Pair<>(Config.logNoOpProb,0));
     String[] terms = query.split(" ");
-    allocateEditDistancesAmongTerms(terms, distance,candidateSet, lm, candidateGenerator);
+    allocateEditDistancesAmongTerms(terms, distance,candidateSet, lm, candidateGenerator,ncm);
     return candidateSet;
   }
   private boolean addWrongTerms(String[] terms, PriorityQueue<Pair<Integer,Double>> wrongWords,int distance, LanguageModel lm,Set<Integer> set){
@@ -64,7 +65,7 @@ public class Dictionary implements Serializable{
 
   private void allocateEditDistancesAmongTerms(String[] terms, int distance,
       Map<String, Pair<Double, Integer>> candidateSet, LanguageModel lm,
-      CandidateGenerator candidateGenerator){
+      CandidateGenerator candidateGenerator,NoisyChannelModel ncm){
     // from wrong words to score
 //    Set<Pair<Integer,Double>> wrongWords = new HashSet<>();
     // leave room for a bigram with two words
@@ -100,7 +101,7 @@ public class Dictionary implements Serializable{
       }
     }
     //wrong words are term level and candidate sets are query level
-    populateCandset(terms,wrongWords,candidateSet,lm,candidateGenerator);
+    populateCandset(terms,wrongWords,candidateSet,lm,candidateGenerator,ncm);
   }
 
   private boolean consistOfOnlyNumberAndSpecialChar(String term) {
@@ -116,7 +117,7 @@ public class Dictionary implements Serializable{
 
   private void populateCandset(String[] terms, PriorityQueue<Pair<Integer, Double>> wrongWords,
       Map<String, Pair<Double,Integer>> candidateSet, LanguageModel lm,
-      CandidateGenerator candidateGenerator) {
+      CandidateGenerator candidateGenerator,NoisyChannelModel ncm) {
     List<List<Pair<String,Integer>>> listOfCandLists = new ArrayList<>();
     Set<Integer> markedWords = new HashSet<>();
     for (Pair<Integer,Double> cand : wrongWords){
@@ -130,7 +131,7 @@ public class Dictionary implements Serializable{
           Map<String,Integer> termToEdit = new HashMap<>();
           for (int k=1;k<Config.correctionDistance;++k){
             map.dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
-                ,0,k,new StringBuilder(),topSelector,termToEdit,map.root,lm, i==0?null:terms[i-1]);
+                ,0,k,new StringBuilder(),topSelector,termToEdit,map.root,lm, i==0?null:terms[i-1],ncm);
           }
 //TODO: delete teh debug
             System.out.println("candidate term: "+terms[i]);
@@ -152,7 +153,7 @@ public class Dictionary implements Serializable{
 //  }
     PriorityQueue<Pair<String,Double>> pq = new PriorityQueue<>(Config.candidateSetSize, new StringDoublePairAscendingComparator());
     Map<String, Integer> mapToEditDistance = new HashMap<>();
-    dfsWithCanset( listOfCandLists, sb, 0,  0, pq,mapToEditDistance, candidateGenerator,lm);
+    dfsWithCanset( listOfCandLists, sb, 0,  0, pq,mapToEditDistance, candidateGenerator,lm,ncm);
     for (Pair<String,Double> oneCan: pq){
       System.out.println("Sentence level candidate: "+oneCan);
       candidateSet.put(oneCan.getFirst(),new Pair<>(oneCan.getSecond(),mapToEditDistance.get(oneCan.getFirst())));
@@ -161,7 +162,7 @@ public class Dictionary implements Serializable{
 
   private void dfsWithCanset(List<List<Pair<String,Integer>>> eachTermSet,StringBuilder sb,
       int setIndex, int cumEditDiff,PriorityQueue<Pair<String,Double>> pq
-      ,  Map<String, Integer> mapToEditDistance, CandidateGenerator generator, LanguageModel lm) {
+      ,  Map<String, Integer> mapToEditDistance, CandidateGenerator generator, LanguageModel lm,NoisyChannelModel ncm) {
 
     if (setIndex == eachTermSet.size()) {
       String newCan = sb.toString();
@@ -191,7 +192,7 @@ public class Dictionary implements Serializable{
           sb.append(" ");
         }
         sb.append(term.getFirst());
-        dfsWithCanset(eachTermSet, sb, setIndex + 1, cumEditDiff + term.getSecond(), pq,mapToEditDistance,generator,lm);
+        dfsWithCanset(eachTermSet, sb, setIndex + 1, cumEditDiff + term.getSecond(), pq,mapToEditDistance,generator,lm,ncm);
         sb.setLength(restoreLen);
       }
     }

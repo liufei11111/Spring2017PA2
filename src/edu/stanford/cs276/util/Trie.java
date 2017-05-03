@@ -3,6 +3,7 @@ package edu.stanford.cs276.util;
 import edu.stanford.cs276.CandidateGenerator;
 import edu.stanford.cs276.Config;
 import edu.stanford.cs276.LanguageModel;
+import edu.stanford.cs276.NoisyChannelModel;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -137,20 +138,24 @@ public  class Trie implements Serializable{
     return cur;
   }
 
-  private void updateCandidateSet(StringBuilder result, String prevString,LanguageModel lm, PriorityQueue<Pair<String, Double>> canSet, Map<String,Integer> termToEdit, int remainingEditsAllowed){
+  private void updateCandidateSet(char[] original, StringBuilder result, String prevString,
+      LanguageModel lm, PriorityQueue<Pair<String, Double>> canSet, Map<String,Integer> termToEdit,
+      int remainingEditsAllowed,NoisyChannelModel ncm){
     String newCan = result.toString();
+    int editCumDis= Config.correctionDistance-remainingEditsAllowed;
     if (!termToEdit.containsKey(newCan)){
-      termToEdit.put(newCan,Config.correctionDistance-remainingEditsAllowed);
+      termToEdit.put(newCan,editCumDis);
     }else{
       int currEditDiff = termToEdit.get(newCan);
-      int newEditDiff = Config.correctionDistance-remainingEditsAllowed;
-      if (currEditDiff > newEditDiff){
-        termToEdit.put(newCan,newEditDiff);
-      }
+      if (currEditDiff > editCumDis){
+        termToEdit.put(newCan,editCumDis);
+      }else{
         return;
+      }
+//        return;
     }
 //        System.out.println("Adding: "+result.toString());
-    double newCanScore = lm.bigramJointProb(prevString,newCan);
+    double newCanScore = lm.bigramJointProb(prevString,newCan)+ncm.getEditCostModel().editProbability(new String(original),newCan,editCumDis);
     if (canSet.size()< Config.candidateSetSize){
 
       canSet.add(new Pair<>(newCan,newCanScore));
@@ -163,7 +168,7 @@ public  class Trie implements Serializable{
   }
   public void dfsGen(char[] original, Set<Character> alternativeChars, int curr, int distance,
       StringBuilder result, PriorityQueue<Pair<String, Double>> canSet,  Map<String,Integer> termToEdit , TrieNode node,
-      LanguageModel lm, String prevString){
+      LanguageModel lm, String prevString,NoisyChannelModel ncm){
     // TODO: remove the TEST
 //    String TEST = new String(original);
 
@@ -182,14 +187,14 @@ public  class Trie implements Serializable{
 //      }
       if (this.search(temp,node)){
         result.append(temp);
-        updateCandidateSet(result,prevString, lm, canSet, termToEdit, distance);
+        updateCandidateSet(original,result,prevString, lm, canSet, termToEdit, distance,ncm);
         result.setLength(startingLen);
       }
       return;
     }
     if (curr == original.length){
       if( node != null && distance >0){
-        suffixDFS(node,distance,canSet,result, prevString, lm,termToEdit,distance);
+        suffixDFS(original,node,distance,canSet,result, prevString, lm,termToEdit,distance,ncm);
         result.setLength(startingLen);
       }
       return;
@@ -210,7 +215,7 @@ public  class Trie implements Serializable{
 //      System.out.println("possiblePositions before deletion: ");
 //      node.possiblePosition.stream().forEach(System.out::println);
 //      System.out.println("deletion: "+currChar+", result: "+result.toString());
-      dfsGen(original,alternativeChars,curr+1,distance-1,result,canSet,termToEdit,node, lm,prevString);
+      dfsGen(original,alternativeChars,curr+1,distance-1,result,canSet,termToEdit,node, lm,prevString,ncm);
     }
 
 
@@ -231,7 +236,7 @@ public  class Trie implements Serializable{
           // check if the remaining substring can existing in trie
           result.append(c);
 //          if (TEST.equals("singledays")) System.out.println("insertion: "+c+", result: "+result.toString());
-          dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit,next, lm,prevString);
+          dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit,next, lm,prevString,ncm);
           result.setLength(startingLen);
         }else{
 //          if (TEST.equals("singledays")) System.out.println("Interstion space begin:");
@@ -240,7 +245,7 @@ public  class Trie implements Serializable{
             result.append(c);
 
 //            if (TEST.equals("singledays"))  System.out.println("insertion: <space>, result: "+result.toString());
-            dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit, root, lm,localPrev);
+            dfsGen(original,alternativeChars,curr,distance-2,result,canSet,termToEdit, root, lm,localPrev,ncm);
             result.setLength(startingLen);
           }
 //          if (TEST.equals("singledays")) System.out.println("Interstion space complete!");
@@ -263,7 +268,7 @@ public  class Trie implements Serializable{
 //        if (node.possiblePosition.contains(remainingLen)) {
           result.append(c);
 //          System.out.println("substitute: " + currChar+" to "+c + ", result: " + result.toString());
-          dfsGen(original, alternativeChars, curr + 1, distance - 1, result, canSet,termToEdit,next, lm,prevString);
+          dfsGen(original, alternativeChars, curr + 1, distance - 1, result, canSet,termToEdit,next, lm,prevString,ncm);
           result.setLength(startingLen);
 //        }
         }
@@ -281,7 +286,7 @@ public  class Trie implements Serializable{
 //          if (node.possiblePosition.contains(remainingLen)){
             result.append(nextChar);
             result.append(currChar);
-            dfsGen(original,alternativeChars,curr+2,distance-1,result,canSet,termToEdit,nextNext, lm,prevString);
+            dfsGen(original,alternativeChars,curr+2,distance-1,result,canSet,termToEdit,nextNext, lm,prevString,ncm);
             result.setLength(startingLen);
 //          }
 
@@ -295,20 +300,20 @@ public  class Trie implements Serializable{
 //    System.out.println("possiblePositions before continue: ");
 //    node.possiblePosition.stream().forEach(System.out::println);
 //    System.out.println("continue: "+currChar+", result: "+result.toString());
-    dfsGen(original,alternativeChars,curr+1,distance,result,canSet,termToEdit,next, lm, prevString);
+    dfsGen(original,alternativeChars,curr+1,distance,result,canSet,termToEdit,next, lm, prevString,ncm);
     result.setLength(startingLen);
   }
 
-  private void suffixDFS(TrieNode node, int distance, PriorityQueue<Pair<String, Double>> canSet,
-      StringBuilder result, String prevString, LanguageModel lm, Map<String,Integer> map, int remainingBalance) {
+  private void suffixDFS(char[] original,TrieNode node, int distance, PriorityQueue<Pair<String, Double>> canSet,
+      StringBuilder result, String prevString, LanguageModel lm, Map<String,Integer> map, int remainingBalance,NoisyChannelModel ncm) {
     if (distance == 0 && node.wordCount > 0){
 //      System.out.println("Adding: "+result.toString());
-      updateCandidateSet(result,prevString, lm, canSet,map,remainingBalance);
+      updateCandidateSet(original,result,prevString, lm, canSet,map,remainingBalance,ncm);
     }else{
       for ( Character c: node.children.keySet()){
         int len = result.length();
         result.append(c);
-        suffixDFS(node.children.get(c),distance-1,canSet,result,prevString,lm,map,remainingBalance);
+        suffixDFS(original,node.children.get(c),distance-1,canSet,result,prevString,lm,map,remainingBalance,ncm);
         result.setLength(len);
       }
     }

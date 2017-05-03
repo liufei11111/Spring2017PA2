@@ -46,8 +46,8 @@ public class CandidateGenerator implements Serializable {
       "the","a","they","it"
   };
   // Generate all candidates for the target query
-  public Map<String, Pair<Double, Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm) throws Exception {
-    return dic.generateKoffCandidates(query,Config.distance,lm,this);
+  public Map<String, Pair<Double, Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm, NoisyChannelModel ncm) throws Exception {
+    return dic.generateKoffCandidates(query,Config.distance,lm,this,ncm);
   }
 
 
