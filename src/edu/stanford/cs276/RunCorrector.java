@@ -81,6 +81,7 @@ public class RunCorrector {
     FileWriter fw3 = new FileWriter(new File("./pa2-space-diff.txt"));
     while ((query = queriesFileReader.readLine()) != null) {
       Map<String,Pair<Double,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict,languageModel);
+      queries= canGen.filterStopWords(queries);
       Pair<String,double[]> correctedQuery =  canGen.getCorrectedQuery(query,queries,nsm,languageModel);
       queries.clear();// force GC
       /*

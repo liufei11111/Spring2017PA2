@@ -95,4 +95,11 @@ public class CandidateGenerator implements Serializable {
     return logLanguageScore;
   }
 
+  public Map<String,Pair<Double,Integer>> filterStopWords(Map<String, Pair<Double, Integer>> queries) {
+    for (String str : stopWordsSet){
+      if (queries.containsKey(str)&&queries.get(str).getSecond()>0){
+        queries.remove(str);
+      }
+    }
+  }
 }
