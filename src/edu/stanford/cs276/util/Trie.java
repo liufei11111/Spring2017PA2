@@ -164,7 +164,8 @@ public  class Trie implements Serializable{
   public void dfsGen(char[] original, Set<Character> alternativeChars, int curr, int distance,
       StringBuilder result, PriorityQueue<Pair<String, Double>> canSet,  Map<String,Integer> termToEdit , TrieNode node,
       LanguageModel lm, String prevString){
-    String TEST = new String(original);
+    // TODO: remove the TEST
+//    String TEST = new String(original);
 
     int originalLen = original.length;
     int remainingLen = originalLen-curr;
@@ -215,10 +216,10 @@ public  class Trie implements Serializable{
 
     Set<Character> keySet = new HashSet<>(node.children.keySet());
     keySet.retainAll(alternativeChars);
-    if (TEST.equals("singledays")){
-      System.out.println("Before insert ");
-      System.out.println("remainingLen: "+remainingLen+", startingLen: "+startingLen +", originalLen: "+originalLen+", distance: "+distance);
-    }
+//    if (TEST.equals("singledays")){
+//      System.out.println("Before insert ");
+//      System.out.println("remainingLen: "+remainingLen+", startingLen: "+startingLen +", originalLen: "+originalLen+", distance: "+distance);
+//    }
     // insertion
     // we can truncate when we are so long in expected length that deletion makes no sense
 
@@ -229,28 +230,28 @@ public  class Trie implements Serializable{
           next = node.children.get(c);
           // check if the remaining substring can existing in trie
           result.append(c);
-          if (TEST.equals("singledays")) System.out.println("insertion: "+c+", result: "+result.toString());
+//          if (TEST.equals("singledays")) System.out.println("insertion: "+c+", result: "+result.toString());
           dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit,next, lm,prevString);
           result.setLength(startingLen);
         }else{
-          if (TEST.equals("singledays")) System.out.println("Interstion space begin:");
+//          if (TEST.equals("singledays")) System.out.println("Interstion space begin:");
           if (node != null && node.wordCount>0 && curr!=0 && curr != originalLen){
 
             result.append(c);
-            if (TEST.equals("singledays"))  System.out.println("insertion: <space>, result: "+result.toString());
+//            if (TEST.equals("singledays"))  System.out.println("insertion: <space>, result: "+result.toString());
             dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit, root, lm,prevString);
             result.setLength(startingLen);
           }
-          if (TEST.equals("singledays")) System.out.println("Interstion space complete!");
+//          if (TEST.equals("singledays")) System.out.println("Interstion space complete!");
         }
 
 
       }
       keySet.remove(' ');
     }
-    if (TEST.equals("singledays")){
-      System.out.println("Insert finish!");
-    }
+//    if (TEST.equals("singledays")){
+//      System.out.println("Insert finish!");
+//    }
 //    // substitue
     for (Character c : keySet){
         if (!c.equals(currChar)){
