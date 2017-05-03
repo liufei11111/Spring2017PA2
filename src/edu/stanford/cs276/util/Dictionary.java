@@ -104,7 +104,7 @@ public class Dictionary implements Serializable{
     populateCandset(terms,wrongWords,candidateSet,lm,candidateGenerator,ncm);
   }
 
-  private boolean consistOfOnlyNumberAndSpecialChar(String term) {
+  public static boolean consistOfOnlyNumberAndSpecialChar(String term) {
     char[] array = term.toCharArray();
     Set<Character> specialLiteral = new HashSet<>(Arrays.asList(CandidateGenerator.numberAndSpecialCharSet));
     for (char li : array){

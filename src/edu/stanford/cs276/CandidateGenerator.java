@@ -43,7 +43,7 @@ public class CandidateGenerator implements Serializable {
       '8', '9', ' ', ',','-','_','.', '&','!','(',')','[',']','#','$','%','^','+',"'".toCharArray()[0]
   };
   public static final String[] stopWordsSet = {
-      "the","a","they","it"
+      "the","a","they","it","so"
   };
   // Generate all candidates for the target query
   public Map<String, Pair<Double, Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm, NoisyChannelModel ncm) throws Exception {
