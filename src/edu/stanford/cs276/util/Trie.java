@@ -223,6 +223,7 @@ public  class Trie implements Serializable{
     // we can truncate when we are so long in expected length that deletion makes no sense
 
     if ((remainingLen+startingLen) - originalLen < distance){
+      keySet.add(' ');
       for (Character c : keySet){
         if (c != ' '){
           next = node.children.get(c);
@@ -245,6 +246,7 @@ public  class Trie implements Serializable{
 
 
       }
+      keySet.remove(' ');
     }
     if (TEST.equals("singledays")){
       System.out.println("Insert finish!");
