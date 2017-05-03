@@ -38,6 +38,10 @@ public class CandidateGenerator implements Serializable {
       '0', '1', '2', '3', '4', '5', '6', '7',
       '8', '9', ' ', ',','-','_','.', '&','!','(',')','[',']','#','$','%','^','+',"'".toCharArray()[0]
   };
+  public static final String[] numberAndSpecialCharSet = {
+      '0', '1', '2', '3', '4', '5', '6', '7',
+      '8', '9', ' ', ',','-','_','.', '&','!','(',')','[',']','#','$','%','^','+',"'".toCharArray()[0]
+  };
   // Generate all candidates for the target query
   public Map<String, Pair<Double, Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm) throws Exception {
     return dic.generateKoffCandidates(query,Config.distance,lm,this);
