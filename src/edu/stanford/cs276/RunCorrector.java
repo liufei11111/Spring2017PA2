@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,6 +76,8 @@ public class RunCorrector {
      * the most likely correction
      */
     FileWriter fw = new FileWriter(new File("/tmp/pa2-diff.txt"));
+    FileWriter fw2 = new FileWriter(new File("/tmp/pa2-word-diff.txt"));
+    FileWriter fw3 = new FileWriter(new File("/tmp/pa2-space-diff.txt"));
     while ((query = queriesFileReader.readLine()) != null) {
       Map<String,Pair<Double,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict,languageModel);
       Pair<String,Double> correctedQuery =  canGen.getCorrectedQuery(query,queries,nsm,languageModel);
@@ -105,9 +109,26 @@ public class RunCorrector {
          * help you improve your candidate generation/scoring steps 
          */
         if (!goldQuery.equals(correctedQuery.getFirst())){
-          fw.write("GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
+          fw.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
         }
-
+        String[] goldterms = goldQuery.split(" ");
+        String[] myterms = correctedQuery.getFirst().split(" ");
+        if (goldterms.length != myterms.length){
+          fw3.write(("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
+        }
+        if (goldterms.length == myterms.length){
+          List<Pair<String,String>> listDiff = new LinkedList<>();
+          for (int i=0;i<goldterms.length;++i){
+            if (!goldterms[i].equals(myterms[i])){
+              listDiff.add(new Pair<>(goldterms[i],myterms[i]));
+            }
+          }
+          StringBuilder sb = new StringBuilder();
+          for (Pair<String,String> pair:listDiff){
+            sb.append(pair+" ")
+          }
+          fw2.write(("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n"+sb.toString()+"\n");
+        }
       }
       
       /*
