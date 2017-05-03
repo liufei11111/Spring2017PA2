@@ -67,12 +67,18 @@ public class Dictionary implements Serializable{
     // from wrong words to score
 //    Set<Pair<Integer,Double>> wrongWords = new HashSet<>();
     PriorityQueue<Pair<Integer,Double>> wrongWords = new PriorityQueue<Pair<Integer,Double>>(distance, new IntegerDoublePairDecendingComparator());
+    Set<Integer> whiteList = new HashSet<>();
+    for(int i=0;i<terms.length-1;++i){
+      if (consistOfOnlyNumberAndSpecialChar(terms[i])){
+        whiteList.add(i);
+      }
+    }
     if (!addWrongTerms(terms,wrongWords,distance,lm)){
       return;
     }
     if (wrongWords.size()<distance){
       for(int i=0;i<terms.length-1;++i){
-        if (wrongWords.contains(i)||wrongWords.contains(i+1)){
+        if (wrongWords.contains(i)||wrongWords.contains(i+1)||whiteList.contains(i)){
           continue;
         }
 
@@ -93,6 +99,17 @@ public class Dictionary implements Serializable{
     }
     //wrong words are term level and candidate sets are query level
     populateCandset(terms,wrongWords,candidateSet,lm,candidateGenerator);
+  }
+
+  private boolean consistOfOnlyNumberAndSpecialChar(String term) {
+    char[] array = term.toCharArray();
+    Set<Character> specialLiteral = new HashSet<>(Arrays.asList(CandidateGenerator.numberAndSpecialCharSet));
+    for (char li : array){
+      if (!specialLiteral.contains(li)){
+        return false;
+      }
+    }
+    return true;
   }
 
   private void populateCandset(String[] terms, PriorityQueue<Pair<Integer, Double>> wrongWords,
