@@ -66,7 +66,7 @@ public class CandidateGenerator implements Serializable {
     for(int i=0;i<terms.length-1;++i){
       if (i==0) {
         // raw count is good as the total count is a constant
-        int rawCount = lm.rawCountForTerm(terms[i];
+        int rawCount = lm.rawCountForTerm(terms[i]);
         logLanguageScore += Math.log(rawCount+Config.eps);
       }
       int rawBiCount = lm.rawBiCountForTerms(terms[i],terms[i+1]);
