@@ -149,11 +149,11 @@ public class LanguageModel implements Serializable {
   }
   public int rawCountForTerm(String term){
     Integer count = map.get(term);
-    return count == null? 0:count;
+    return count == null? 1:count;
   }
   public int rawBiCountForTerms(String term1, String term2){
     Integer count = bigram.get(new Pair<>(term1,term2));
-    return count == null? 0:count*1;
+    return count == null? 1:count;
   }
   public double unigramProbForTerm(String term) {
     Integer count = map.get(term);
