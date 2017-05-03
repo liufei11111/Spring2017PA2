@@ -157,7 +157,7 @@ public class LanguageModel implements Serializable {
     Integer count = bigram.get(new Pair<>(term1,term2));
     return count == null? Config.eps:count;
   }
-  private double unigramProbForTerm(String term) {
+  public double unigramProbForTerm(String term) {
     Integer count = map.get(term);
     if (count == null){
       return Math.log(Config.eps);
@@ -165,7 +165,7 @@ public class LanguageModel implements Serializable {
       return Math.log(count)-Math.log(uniqWordCount);
     }
   }
-  private double getConditionalProd(String term1, String term2) {
+  public double getConditionalProd(String term1, String term2) {
     double unigramScore = unigramProbForTerm(term2);
     if (term1 == null){
       return unigramScore*2;

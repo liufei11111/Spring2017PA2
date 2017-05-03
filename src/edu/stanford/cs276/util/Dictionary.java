@@ -86,7 +86,7 @@ public class Dictionary implements Serializable{
 
 
         // we use bigram to decide which word is wrong. and we just need to log of count and total is constant and can be ignored
-        double scoreBigram = lm.unigramProbForTerm(terms[i])+lm.getConditionalProd(terms[i],terms[i+1]);
+        double scoreBigram = lm.bigramJointProb(terms[i],terms[i+1]);
         if (wrongWords.size()<distance){
           wrongWords.add(new Pair<>(i,scoreBigram));
         }else{
