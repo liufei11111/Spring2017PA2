@@ -16,25 +16,26 @@ public class UniformCostModel implements EditCostModel {
     // take the log will go away. So, we after loging we have log(n)-log(x), log(n-1)-log(x-1),...., log(n-x+1)-log(1) for the combinatorial term
     //  and x*log(k)+(n-x)*log(1-k) . n is constant for all queries.x * (log(k)-log(1-k)) is changing.
     // we have log(n)-log(x), log(n-1)-log(x-1),...., log(n-x+1)-log(1) as rough estimate of edit prob.
-//    double n = original.length();
-//    double x = distance;
-//    double k = Config.charEditProb;
-//    double cum = 0;
-//
-//    cum += x*(Math.log(k)-Math.log(1-k));
-//    for (int i=0;i<distance-1;++i){
-//      cum += Math.log(n)-Math.log(x);
-//      n-=1;
-//      x-=1;
-//    }
-//    cum+=Math.log(n);
-//    return cum;
-    if (distance >=1){
-      return Math.log(0.05)*2;
-    }else if (distance == 1){
-      return Math.log(0.05);
-    }else{
-      return Math.log(0.95);
+    double n = original.length();
+    double x = distance;
+    double k = Config.charEditProb;
+    double cum = 0;
+
+    cum += x*(Math.log(k)-Math.log(1-k));
+    for (int i=0;i<distance-1;++i){
+      cum += Math.log(n)-Math.log(x);
+      n-=1;
+      x-=1;
     }
+    cum+=Math.log(n);
+    return cum;
+//    double
+//    if (distance >=1){
+//      return Math.log(0.05)*2;
+//    }else if (distance == 1){
+//      return Math.log(0.05);
+//    }else{
+//      return Math.log(0.95);
+//    }
   }
 }
