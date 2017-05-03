@@ -236,10 +236,11 @@ public  class Trie implements Serializable{
         }else{
 //          if (TEST.equals("singledays")) System.out.println("Interstion space begin:");
           if (node != null && node.wordCount>0 && curr!=0 && curr != originalLen){
-
+            String localPrev = result.toString();
             result.append(c);
+
 //            if (TEST.equals("singledays"))  System.out.println("insertion: <space>, result: "+result.toString());
-            dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit, root, lm,prevString);
+            dfsGen(original,alternativeChars,curr,distance-1,result,canSet,termToEdit, root, lm,localPrev);
             result.setLength(startingLen);
           }
 //          if (TEST.equals("singledays")) System.out.println("Interstion space complete!");
