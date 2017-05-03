@@ -31,9 +31,7 @@ public class UniformCostModel implements EditCostModel {
 //    return cum;
     double suspecion = 0.25;
     if (distance >=1){
-      return Math.log(suspecion)*2;
-    }else if (distance == 1){
-      return Math.log(suspecion);
+      return Math.log(suspecion)*distance;
     }else{
       return Math.log(1-suspecion);
     }
