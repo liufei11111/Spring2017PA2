@@ -130,7 +130,7 @@ public class RunCorrector {
             for (Pair<String,String> pair:listDiff){
               sb.append(pair+" ");
             }
-            fw2.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"________"+sb.toString()+"\n");
+            fw2.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"________"+sb.toString()+" Scores: "+ Arrays.toString(scores)+"\n");
           }
         }
       }
