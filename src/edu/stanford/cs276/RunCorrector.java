@@ -110,24 +110,25 @@ public class RunCorrector {
          */
         if (!goldQuery.equals(correctedQuery.getFirst())){
           fw.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
-        }
-        String[] goldterms = goldQuery.split(" ");
-        String[] myterms = correctedQuery.getFirst().split(" ");
-        if (goldterms.length != myterms.length){
-          fw3.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
-        }
-        if (goldterms.length == myterms.length){
-          List<Pair<String,String>> listDiff = new LinkedList<>();
-          for (int i=0;i<goldterms.length;++i){
-            if (!goldterms[i].equals(myterms[i])){
-              listDiff.add(new Pair<>(goldterms[i],myterms[i]));
+          String[] goldterms = goldQuery.split(" ");
+          String[] myterms = correctedQuery.getFirst().split(" ");
+          if (goldterms.length != myterms.length) {
+            fw3.write(
+                "original: " + query + ", GoldQuery: " + goldQuery + ", MyQuery: " + correctedQuery
+                    .getFirst() + "\n");
+          }else{
+            List<Pair<String,String>> listDiff = new LinkedList<>();
+            for (int i=0;i<goldterms.length;++i){
+              if (!goldterms[i].equals(myterms[i])){
+                listDiff.add(new Pair<>(goldterms[i],myterms[i]));
+              }
             }
+            StringBuilder sb = new StringBuilder();
+            for (Pair<String,String> pair:listDiff){
+              sb.append(pair+" ");
+            }
+            fw2.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n"+sb.toString()+"\n");
           }
-          StringBuilder sb = new StringBuilder();
-          for (Pair<String,String> pair:listDiff){
-            sb.append(pair+" ");
-          }
-          fw2.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n"+sb.toString()+"\n");
         }
       }
       
