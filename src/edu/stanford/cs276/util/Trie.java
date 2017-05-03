@@ -155,7 +155,9 @@ public  class Trie implements Serializable{
 //        return;
     }
 //        System.out.println("Adding: "+result.toString());
-    double newCanScore = lm.bigramJointProb(prevString,newCan)+ncm.getEditCostModel().editProbability(new String(original),newCan,editCumDis);
+    double newCanScore = CandidateGenerator.noisyChannelLanguageJoinProb(
+        lm.bigramJointProb(prevString,newCan),ncm.getEditCostModel().editProbability(new String(original),newCan,editCumDis));
+
     if (canSet.size()< Config.candidateSetSize){
 
       canSet.add(new Pair<>(newCan,newCanScore));
