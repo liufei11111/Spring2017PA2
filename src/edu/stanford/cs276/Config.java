@@ -10,5 +10,5 @@ public class Config {
   public static final double eps = 1e-25;
   public static final int candidateSetSize = 10;
 //  public static final double charEditProb = 1-1e32;// given that it is selected
-  public static final Double logNoOpProb = -25.0;
+  public static final Double logNoOpProb = -125.0;
 }
