@@ -36,7 +36,7 @@ public class CandidateGenerator implements Serializable {
       '8', '9', ' ', ',' };
   public static final Character[] numberAndSpecialCharSet = {
       '0', '1', '2', '3', '4', '5', '6', '7',
-      '8', '9', ' ', ',','-','_','.'
+      '8', '9', ' ', ',','-','_','.', '&','!','(',')','[',']','#','$','%','^'
   };
   // Generate all candidates for the target query
   public Map<String, Pair<Double, Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm) throws Exception {
