@@ -9,6 +9,6 @@ public class Config {
   public static final double languageModelScalingFactor = 1.0;
   public static final double eps = 1e-25;
   public static final int candidateSetSize = 10;
-  public static final double charEditProb = 0.999999;// given that it is selected
+  public static final double charEditProb = 1-1e25;// given that it is selected
   public static final Double logNoOpProb = Math.log(1-charEditProb);
 }
