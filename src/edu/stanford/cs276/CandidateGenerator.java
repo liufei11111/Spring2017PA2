@@ -100,6 +100,6 @@ public class CandidateGenerator implements Serializable {
       if (queries.containsKey(str)&&queries.get(str).getSecond()>0){
         queries.remove(str);
       }
-    }
+    }return queries;
   }
 }
