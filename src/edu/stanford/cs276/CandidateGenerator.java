@@ -49,9 +49,7 @@ public class CandidateGenerator implements Serializable {
   public Map<String, Pair<Double, Integer>> getCandidates(String query,Dictionary dic,LanguageModel lm, NoisyChannelModel ncm) throws Exception {
     return dic.generateKoffCandidates(query,Config.distance,lm,this,ncm);
   }
-  public static double noisyChannelLanguageJoinProb(double languageScore, double noisyScore){
-    return noisyScore+Config.languageModelScalingFactor * languageScore;
-  }
+
 
   public Pair<String,double[]> getCorrectedQuery(String original, Map<String,Pair<Double,Integer>> queries,NoisyChannelModel ncm, LanguageModel lm) {
     Pair<String, double[]> thePair = null;
@@ -68,7 +66,7 @@ public class CandidateGenerator implements Serializable {
 //      }
       double noisyScore = ncm.getEditCostModel().editProbability(original,query.getKey(),query.getValue().getSecond());
       double languageScore = query.getValue().getFirst();
-      double candScore =noisyChannelLanguageJoinProb(languageScore,noisyScore);
+      double candScore = noisyScore+Config.languageModelScalingFactor * languageScore;
       double[] scores = new double[3];
       scores[0]=noisyScore;
       scores[1]=languageScore;
