@@ -3,6 +3,10 @@ package edu.stanford.cs276;
 import edu.stanford.cs276.util.Dictionary;
 import edu.stanford.cs276.util.Pair;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -76,6 +80,19 @@ public class CandidateGenerator implements Serializable {
     if (thePair == null){
       throw new RuntimeException("Forbidden query cands without a single result!");
     }
+    // TODO: delete this test section!!!!!
+    List<Entry<String,Pair<Double,Integer>>> list = new ArrayList<>();
+    Collections.sort(list, new Comparator<Entry<String, Pair<Double, Integer>>>() {
+      @Override
+      public int compare(Entry<String, Pair<Double, Integer>> o1,
+          Entry<String, Pair<Double, Integer>> o2) {
+        return o1.getValue().getFirst().compareTo(o2.getValue().getFirst());
+      }
+    });
+    for (Entry<String,Pair<Double,Integer>> entry : list){
+      System.out.println(entry.getKey()+": "+entry.getValue());
+    }
+    // TODO: delete this test section!!!!!
     return thePair;
   }
 
