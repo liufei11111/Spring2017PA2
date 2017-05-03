@@ -9,6 +9,6 @@ public class IntegerDoublePairDecendingComparator implements Comparator<Pair<Int
 
   @Override
   public int compare(Pair<Integer, Double> o1, Pair<Integer, Double> o2) {
-    return o2.getSecond().compareTo(o1.getSecond());
+    return o1.getSecond().compareTo(o2.getSecond());
   }
 }
