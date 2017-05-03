@@ -8,7 +8,7 @@ public class Config {
   public static final int distance = 2; // number of edit's allowed in query
   public static final int correctionDistance = 2; // for a term, edit distance
   public static final int kOfGrams = 2;
-  public static final double smoothingFactor = 0.5;
+  public static final double smoothingFactor = 0.1;
   public static final double languageModelScalingFactor = 1.0;
   public static final double eps = 1e-25;
   public static final int hashMapInitialSize = 8;

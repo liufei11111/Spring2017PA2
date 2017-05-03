@@ -102,11 +102,10 @@ public class CandidateGenerator implements Serializable {
     for(int i=0;i<terms.length-1;++i){
       if (i==0) {
         // raw count is good as the total count is a constant
-        double rawCount = lm.rawCountForTerm(terms[i]);
-        logLanguageScore += Math.log(rawCount);
+        logLanguageScore += lm.unigramProbForTerm(terms[i]);
       }
-      double rawBiCount = lm.rawBiCountForTerms(terms[i],terms[i+1]);
-      logLanguageScore+=Math.log(rawBiCount);
+
+      logLanguageScore+=lm.getConditionalProd(terms[i],terms[i+1]);
 
     }
     return logLanguageScore;

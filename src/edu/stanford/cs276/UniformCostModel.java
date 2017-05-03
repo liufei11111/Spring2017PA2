@@ -33,7 +33,7 @@ public class UniformCostModel implements EditCostModel {
     if (distance >=1){
       return Math.log(suspecion)*distance;
     }else{
-      return Math.log(1-suspecion);
+      return 0;
     }
   }
 }

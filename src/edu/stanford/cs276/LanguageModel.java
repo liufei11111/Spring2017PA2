@@ -147,11 +147,11 @@ public class LanguageModel implements Serializable {
     save.writeObject(this);
     save.close();
   }
-  public double rawCountForTerm(String term){
+  private double rawCountForTerm(String term){
     Integer count = map.get(term);
     return count == null? Config.eps:count;
   }
-  public double rawBiCountForTerms(String term1, String term2){
+  private double rawBiCountForTerms(String term1, String term2){
     Integer count = bigram.get(new Pair<>(term1,term2));
     return count == null? Config.eps:count;
   }
@@ -160,18 +160,19 @@ public class LanguageModel implements Serializable {
     if (count == null){
       return 0.0;
     }else{
-      return Math.log(count);
+      return Math.log(count)-Math.log(uniqWordCount);
     }
-//    return 0.5;
   }
-
-  public double getBigramProbFor(String term1, String term2) {
+  public double getConditionalProd(String term1, String term2) {
+    double unigramScore = unigramProbForTerm(term2);
     if (term1 == null){
-      return unigramProbForTerm(term2);
+      return unigramScore*2;
     }
-    double term2Unigram = rawCountForTerm(term2);
+    double termUnigram = rawCountForTerm(term1);
+    double countBigram = rawBiCountForTerms(term1,term2);
+    double bigramScore = Math.log(countBigram)-Math.log(termUnigram+Config.eps);
     // we use bigram to decide which word is wrong. and we just need to log of count and total is constant and can be ignored
-    return  Math.log(term2Unigram)*Config.smoothingFactor+Math.log(rawBiCountForTerms(term1,term2))*(1-Config.smoothingFactor);
+    return  unigramScore*Config.smoothingFactor+bigramScore*(1-Config.smoothingFactor);
   }
 
 
