@@ -41,18 +41,18 @@ public class Dictionary implements Serializable{
     allocateEditDistancesAmongTerms(terms, distance,candidateSet, lm, candidateGenerator);
     return candidateSet;
   }
-  private boolean addWrongTerms(String[] terms, PriorityQueue<Pair<Integer,Double>> wrongWords,int distance, LanguageModel lm){
+  private boolean addWrongTerms(String[] terms, PriorityQueue<Pair<Integer,Double>> wrongWords,int distance, LanguageModel lm,Set<Integer> set){
     int count = 0;
     for (int i=0;i<terms.length;++i){
       double score = lm.unigramProbForTerm(terms[i]);
       if (score == 0.0){
         count++;
-        if (count <distance){
+        if (count <distance && !set.contains(i)){
           wrongWords.add(new Pair<>(i,score));
         }
       }
     }
-    if (count > distance){
+    if (count > distance*2){
       // a query full of junk. We give up and let it go
       wrongWords.clear();
       return false;
@@ -73,7 +73,7 @@ public class Dictionary implements Serializable{
         whiteList.add(i);
       }
     }
-    if (!addWrongTerms(terms,wrongWords,distance,lm)){
+    if (!addWrongTerms(terms,wrongWords,distance,lm,whiteList)){
       return;
     }
     if (wrongWords.size()<distance){
