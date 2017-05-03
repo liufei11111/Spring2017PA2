@@ -75,9 +75,9 @@ public class RunCorrector {
      * Each line in the file represents one query. We loop over each query and find
      * the most likely correction
      */
-    FileWriter fw = new FileWriter(new File("/tmp/pa2-diff.txt"));
-    FileWriter fw2 = new FileWriter(new File("/tmp/pa2-word-diff.txt"));
-    FileWriter fw3 = new FileWriter(new File("/tmp/pa2-space-diff.txt"));
+    FileWriter fw = new FileWriter(new File("./pa2-diff.txt"));
+    FileWriter fw2 = new FileWriter(new File("./pa2-word-diff.txt"));
+    FileWriter fw3 = new FileWriter(new File("./pa2-space-diff.txt"));
     while ((query = queriesFileReader.readLine()) != null) {
       Map<String,Pair<Double,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict,languageModel);
       Pair<String,Double> correctedQuery =  canGen.getCorrectedQuery(query,queries,nsm,languageModel);
