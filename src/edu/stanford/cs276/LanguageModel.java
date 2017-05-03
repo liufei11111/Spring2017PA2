@@ -80,8 +80,11 @@ public class LanguageModel implements Serializable {
          */
         String[] tokens = line.split(" ");
         for (int i=0;i<tokens.length;++i){
-          if (Dictionary.consistOfOnlyNumberAndSpecialChar(tokens[i])){
+          try{
+            Double.parseDouble(tokens[i]);
             continue;
+          }catch(Exception e){
+            // I know. Don't judge it
           }
           if (i!=tokens.length-1){
             Pair<String,String> bigramPair = new Pair<>(tokens[i],tokens[i+1]);
