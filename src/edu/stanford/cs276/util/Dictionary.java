@@ -132,8 +132,8 @@ public class Dictionary implements Serializable{
             map.dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
                 ,0,k,new StringBuilder(),topSelector,termToEdit,map.root,lm, i==0?null:terms[i-1]);
           }
-
-        System.out.println("candidate term: "+terms[i]);
+//TODO: delete teh debug
+            System.out.println("candidate term: "+terms[i]);
           for (Pair<String,Double> pair: topSelector){
             canSetPerTerm.add(new Pair<>(pair.getFirst(),termToEdit.get(pair.getFirst())));
             System.out.println(pair);
@@ -154,6 +154,7 @@ public class Dictionary implements Serializable{
     Map<String, Integer> mapToEditDistance = new HashMap<>();
     dfsWithCanset( listOfCandLists, sb, 0,  0, pq,mapToEditDistance, candidateGenerator,lm);
     for (Pair<String,Double> oneCan: pq){
+      System.out.println("Sentence level candidate: "+oneCan);
       candidateSet.put(oneCan.getFirst(),new Pair<>(oneCan.getSecond(),mapToEditDistance.get(oneCan.getFirst())));
     }
   }
