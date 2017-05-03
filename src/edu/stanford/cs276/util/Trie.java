@@ -150,7 +150,7 @@ public  class Trie implements Serializable{
         return;
     }
 //        System.out.println("Adding: "+result.toString());
-    double newCanScore = lm.getBigramProbFor(prevString,newCan);
+    double newCanScore = lm.bigramJointProb(prevString,newCan);
     if (canSet.size()< Config.candidateSetSize){
 
       canSet.add(new Pair<>(newCan,newCanScore));

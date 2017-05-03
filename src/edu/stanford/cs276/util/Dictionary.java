@@ -44,11 +44,12 @@ public class Dictionary implements Serializable{
   private boolean addWrongTerms(String[] terms, PriorityQueue<Pair<Integer,Double>> wrongWords,int distance, LanguageModel lm,Set<Integer> set){
     int count = 0;
     for (int i=0;i<terms.length;++i){
-      double score = lm.unigramProbForTerm(terms[i]);
-      if (score == 0.0){
+//      double score = lm.unigramProbForTerm(terms[i]);
+
+      if (!lm.containsWord(terms[i])){
         count++;
         if (count <distance && !set.contains(i)){
-          wrongWords.add(new Pair<>(i,score));
+          wrongWords.add(new Pair<>(i,Math.log(Config.eps)));
         }
       }
     }
@@ -66,7 +67,8 @@ public class Dictionary implements Serializable{
       CandidateGenerator candidateGenerator){
     // from wrong words to score
 //    Set<Pair<Integer,Double>> wrongWords = new HashSet<>();
-    PriorityQueue<Pair<Integer,Double>> wrongWords = new PriorityQueue<Pair<Integer,Double>>(distance, new IntegerDoublePairDecendingComparator());
+    // leave room for a bigram with two words
+    PriorityQueue<Pair<Integer,Double>> wrongWords = new PriorityQueue<Pair<Integer,Double>>(distance*2, new IntegerDoublePairDecendingComparator());
     Set<Integer> whiteList = new HashSet<>();
     for(int i=0;i<terms.length-1;++i){
       if (consistOfOnlyNumberAndSpecialChar(terms[i])){
@@ -84,15 +86,15 @@ public class Dictionary implements Serializable{
 
 
         // we use bigram to decide which word is wrong. and we just need to log of count and total is constant and can be ignored
-        double scoreBigram = lm.getBigramProbFor(terms[i],terms[i+1]);
+        double scoreBigram = lm.unigramProbForTerm(terms[i])+lm.getConditionalProd(terms[i],terms[i+1]);
         if (wrongWords.size()<distance){
           wrongWords.add(new Pair<>(i,scoreBigram));
         }else{
           if (scoreBigram<wrongWords.peek().getSecond()){
-            wrongWords.poll();
+//            wrongWords.poll();
             // unigram is tie breaker for two terms
             wrongWords.add(new Pair<>(i+1,scoreBigram));
-//            wrongWords.add(new Pair<>(i,scoreBigram));
+            wrongWords.add(new Pair<>(i,scoreBigram));
           }
         }
       }

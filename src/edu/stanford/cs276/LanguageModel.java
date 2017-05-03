@@ -28,9 +28,9 @@ public class LanguageModel implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
-  HashMap<String,Integer> map = new HashMap<>();
+  public HashMap<String,Integer> map = new HashMap<>();
   Long uniqWordCount = 0L;
-  public HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
+  HashMap<Pair<String,String>,Integer> bigram = new HashMap<Pair<String, String>, Integer>();
   Dictionary kGramTrieDict = null;
 //  byte[] kGramStorageState = null;
 
@@ -102,7 +102,9 @@ public class LanguageModel implements Serializable {
     }
     System.out.println("Done.");
   }
-
+  public boolean containsWord(String str){
+    return map.containsKey(str);
+  }
   /**
    * Creates a new LanguageModel object from a corpus. This method should be used to create a
    * new object rather than calling the constructor directly from outside this class
@@ -155,15 +157,15 @@ public class LanguageModel implements Serializable {
     Integer count = bigram.get(new Pair<>(term1,term2));
     return count == null? Config.eps:count;
   }
-  public double unigramProbForTerm(String term) {
+  private double unigramProbForTerm(String term) {
     Integer count = map.get(term);
     if (count == null){
-      return 0.0;
+      return Math.log(Config.eps);
     }else{
       return Math.log(count)-Math.log(uniqWordCount);
     }
   }
-  public double getConditionalProd(String term1, String term2) {
+  private double getConditionalProd(String term1, String term2) {
     double unigramScore = unigramProbForTerm(term2);
     if (term1 == null){
       return unigramScore*2;
@@ -174,6 +176,8 @@ public class LanguageModel implements Serializable {
     // we use bigram to decide which word is wrong. and we just need to log of count and total is constant and can be ignored
     return  unigramScore*Config.smoothingFactor+bigramScore*(1-Config.smoothingFactor);
   }
-
+  public double bigramJointProb(String term1, String term2){
+    return getConditionalProd(term1,term2) + unigramProbForTerm(term1);
+  }
 
 }
