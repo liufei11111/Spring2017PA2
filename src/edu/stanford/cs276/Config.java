@@ -6,7 +6,7 @@ public class Config {
   public static final String trieFile = "trieFile";
   public static final String candidateGenFile = "candidateGenerator";
   public static final int distance = 2; // number of edit's allowed in query
-  public static final int correctionDistance = 2; // for a term, edit distance
+  public static final int correctionDistance = 1; // for a term, edit distance
   public static final int kOfGrams = 2;
   public static final double smoothingFactor = 0.1;
   public static final double languageModelScalingFactor = 1.0;
