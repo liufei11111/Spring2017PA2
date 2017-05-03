@@ -123,10 +123,6 @@ public class LanguageModel implements Serializable {
         FileInputStream fiA = new FileInputStream(Config.languageModelFile);
         ObjectInputStream oisA = new ObjectInputStream(fiA);
         lm_ = (LanguageModel) oisA.readObject();
-        for (Entry<String,Integer> entry : lm_.map.entrySet()){
-          lm_.kGramTrieDict.add(entry.getKey(),entry.getValue());
-
-        }
       }
     } catch (Exception e) {
       throw e;

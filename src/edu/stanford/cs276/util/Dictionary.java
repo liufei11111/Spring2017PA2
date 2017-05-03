@@ -17,20 +17,7 @@ import java.util.Set;
 public class Dictionary implements Serializable{
   // TODO: This can be replaced with Trie
 //  private int termCount;
-  private Trie map;
 
-
-  public Dictionary() {
-//    termCount = 0;
-    map = new Trie();
-  }
-  public Dictionary(Trie map) {
-//    termCount = 0;
-    this.map = map;
-  }
-  public void add(String term,int count) {
-    map.insert(term,count);
-  }
 
 
   public Map<String,Pair<Double,Integer>> generateKoffCandidates(String query, int distance,
@@ -111,7 +98,13 @@ public class Dictionary implements Serializable{
     }
     return true;
   }
-
+  public void dfsGen(char[] original, Set<Character> alternativeChars, int curr, int distance,
+      StringBuilder result, PriorityQueue<Pair<String, Double>> canSet,  Map<String,Integer> termToEdit ,
+      LanguageModel lm, String prevString){
+    String canString = new String(original);
+      canSet.add(new Pair<>(canString,Config.logNoOpProb));
+    termToEdit.put(canString,0);
+  }
   private void populateCandset(String[] terms, PriorityQueue<Pair<Integer, Double>> wrongWords,
       Map<String, Pair<Double,Integer>> candidateSet, LanguageModel lm,
       CandidateGenerator candidateGenerator) {
@@ -126,8 +119,8 @@ public class Dictionary implements Serializable{
       if (markedWords.contains(i)){
           PriorityQueue<Pair<String,Double>> topSelector = new PriorityQueue<>(Config.candidateSetSize,new StringDoublePairAscendingComparator());
           Map<String,Integer> termToEdit = new HashMap<>();
-          map.dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
-              ,0,Config.correctionDistance,new StringBuilder(),topSelector,termToEdit,map.root,lm, i==0?null:terms[i-1]);
+          dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
+              ,0,Config.correctionDistance,new StringBuilder(),topSelector,termToEdit,lm, i==0?null:terms[i-1]);
         System.out.println("candidate term: "+terms[i]);
           for (Pair<String,Double> pair: topSelector){
             canSetPerTerm.add(new Pair<>(pair.getFirst(),termToEdit.get(pair.getFirst())));
