@@ -8,6 +8,6 @@ import java.util.Comparator;
 public class StringDoublePairAscendingComparator implements Comparator<Pair<String, Double>> {
   @Override
   public int compare(Pair<String, Double> o1, Pair<String, Double> o2) {
-    return o2.getSecond().compareTo(o1.getSecond());
+    return o1.getSecond().compareTo(o2.getSecond());
   }
 }
