@@ -114,7 +114,7 @@ public class RunCorrector {
         String[] goldterms = goldQuery.split(" ");
         String[] myterms = correctedQuery.getFirst().split(" ");
         if (goldterms.length != myterms.length){
-          fw3.write(("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
+          fw3.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n");
         }
         if (goldterms.length == myterms.length){
           List<Pair<String,String>> listDiff = new LinkedList<>();
@@ -125,9 +125,9 @@ public class RunCorrector {
           }
           StringBuilder sb = new StringBuilder();
           for (Pair<String,String> pair:listDiff){
-            sb.append(pair+" ")
+            sb.append(pair+" ");
           }
-          fw2.write(("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n"+sb.toString()+"\n");
+          fw2.write("original: "+query+", GoldQuery: "+goldQuery+", MyQuery: "+correctedQuery.getFirst()+"\n"+sb.toString()+"\n");
         }
       }
       
