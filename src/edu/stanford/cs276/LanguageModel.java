@@ -16,6 +16,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * LanguageModel class constructs a language model from the training corpus.
@@ -55,7 +56,18 @@ public class LanguageModel implements Serializable {
     constructDictionaries(corpusFilePath);
 
   }
+  private boolean containsNumberOrTooLong(String str) {
+    if (str.length()>25){return true;}
+    boolean foundNum = false;
+    for (char aChar : str.toCharArray()){
+      if (Character.isDigit(aChar)){
+        foundNum=true;
+        break;
+      }
 
+    }
+    return foundNum;
+  }
 
   /**
    * This method is called by the constructor, and computes language model parameters 
@@ -78,9 +90,13 @@ public class LanguageModel implements Serializable {
          * Remember: each line is a document (refer to PA2 handout)
          *
          */
-        String[] tokens = line.split(" ");
+        line= line.replaceAll("_+"," ");
+        line = line.replaceAll("\\s+"," ");
+        String[] tokens = line.trim().split(" ");
         for (int i=0;i<tokens.length;++i){
-          if (i!=tokens.length-1){
+          boolean foundNum = containsNumberOrTooLong(tokens[i]);
+          if (foundNum){continue;}
+          if (i!=tokens.length-1&&!containsNumberOrTooLong(tokens[i+1])){
             Pair<String,String> bigramPair = new Pair<>(tokens[i],tokens[i+1]);
             if (bigram.containsKey(bigramPair)){
               bigram.put(bigramPair,bigram.get(bigramPair)+1);
