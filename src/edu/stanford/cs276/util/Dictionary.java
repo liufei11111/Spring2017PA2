@@ -128,10 +128,10 @@ public class Dictionary implements Serializable{
           Map<String,Integer> termToEdit = new HashMap<>();
           map.dfsGen(terms[i].toCharArray(), new HashSet<Character>(Arrays.asList(CandidateGenerator.alphabet))
               ,0,Config.correctionDistance,new StringBuilder(),topSelector,termToEdit,map.root,lm, i==0?null:terms[i-1]);
-        System.out.println("candidate term: "+terms[i]);
+//        System.out.println("candidate term: "+terms[i]);
           for (Pair<String,Double> pair: topSelector){
             canSetPerTerm.add(new Pair<>(pair.getFirst(),termToEdit.get(pair.getFirst())));
-            System.out.println(pair);
+//            System.out.println(pair);
           }
       }else{
         canSetPerTerm.add(new Pair<>(terms[i],0));

@@ -69,8 +69,11 @@ public class RunCorrector {
     nsm = NoisyChannelModel.load();
     canGen = CandidateGenerator.get();
     BufferedReader queriesFileReader = new BufferedReader(new FileReader(new File(queryFilePath)));
+    //TODO delete test
+    BufferedReader gold = new BufferedReader(new FileReader(new File("data/dev_set/gold.txt")));
     nsm.setProbabilityType(uniformOrEmpirical);
     String query = null;
+    String result = null;
 
     /*
      * Each line in the file represents one query. We loop over each query and find
@@ -79,7 +82,7 @@ public class RunCorrector {
     FileWriter fw = new FileWriter(new File("./pa2-diff.txt"));
     FileWriter fw2 = new FileWriter(new File("./pa2-word-diff.txt"));
     FileWriter fw3 = new FileWriter(new File("./pa2-space-diff.txt"));
-    while ((query = queriesFileReader.readLine()) != null) {
+    while ((query = queriesFileReader.readLine()) != null||(result = gold.readLine())!=null) {
       Map<String,Pair<Double,Integer>> queries = canGen.getCandidates(query,languageModel.kGramTrieDict,languageModel);
       queries= canGen.filterStopWords(queries);
       Pair<String,double[]> correctedQuery =  canGen.getCorrectedQuery(query,queries,nsm,languageModel);
